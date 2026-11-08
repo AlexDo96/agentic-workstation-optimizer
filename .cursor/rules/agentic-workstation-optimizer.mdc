@@ -1,14 +1,17 @@
 ---
-description: Agentic Workstation Optimizer - Use when asked to check or fix Windows network speed, Cloud AI API latency, ephemeral port limits for Playwright/Appium/API tests, WSL2 VPN connectivity, router Wi-Fi 6 settings, or local AI (Ollama/GPU) settings.
+description: Agentic Workstation Optimizer - Use when asked to check or optimize Windows hardware (CPU, GPU, RAM, SSD), software, gaming performance, network speed, Cloud AI API latency, ephemeral port limits for Playwright/Appium/API tests, WSL2 VPN connectivity, or local AI (Ollama/GPU) settings.
 globs:
 alwaysApply: false
 ---
 
 # Agentic Workstation Optimizer (`agentic-workstation-optimizer`)
 
-When asked to diagnose or optimize workstation performance, network speed, Cloud AI API connectivity, automated testing port limits, WSL2 networking, or local AI (Ollama/GPU):
+When asked to diagnose or optimize workstation hardware, software, gaming performance, network speed, Cloud AI API connectivity, automated testing port limits, WSL2 networking, or local AI (Ollama/GPU):
 
 1. Follow the steps in [SKILL.md](mdc:SKILL.md).
 2. Run the read-only diagnostic script first:
    `powershell -ExecutionPolicy Bypass -File ./scripts/diagnose-network-ai.ps1 -SaveReport`
-3. On company workstations, do not change corporate DNS, VPN, or router settings. Run `./scripts/optimize-workstation.ps1` to automatically back up current settings and apply local Windows, NIC, Node.js/Git, WSL2, and GPU/Ollama optimizations.
+3. Choose the appropriate mode for `./scripts/optimize-workstation.ps1` (which automatically backs up current settings before making changes):
+   - `-Mode All` (default): For home PCs (Hardware, Software, Gaming, Network & AI).
+   - `-Mode Work`: For company/office PCs (skips gaming tweaks and never alters corporate DNS, Active Directory, or VPN profiles).
+   - `-Mode Gaming`: Dedicated to gaming performance and low latency.

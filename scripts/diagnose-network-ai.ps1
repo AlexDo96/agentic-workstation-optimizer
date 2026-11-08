@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    v2.0 Comprehensive Diagnostic & Benchmark Suite for:
-    - NIC Hardware Properties (Buffers, EEE, ULP, ITR) & Windows TCP Stack
-    - Corporate Network Audit (IPv6 Happy-Eyeballs lag, VPN MTU Blackhole probe, TLS CA)
-    - QA Automation & Multi-Agent Capacity (Ephemeral Port range, TimeWait, NTFS LastAccess)
-    - Cloud AI Provider API Latency (Anthropic, OpenAI, Gemini, OpenRouter, GitHub) & DNS Race
-    - Local AI & WSL2 Readiness (GPU HAGS, VRAM, Ollama flags, .wslconfig Mirrored Mode)
-    - Optional Markdown Scorecard Generator (-SaveReport)
+    Read-only diagnostic script for Windows Hardware, Software, Network, Gaming, QA Automation & AI readiness:
+    1. Active Network Adapters & Hardware Properties (Buffers, EEE, ULP, ITR)
+    2. Windows TCP Stack, Ephemeral Ports (Playwright/Appium/API) & File System I/O (NTFS, SSD)
+    3. Corporate Network Check (IPv6 vs IPv4 routing, non-fragmented VPN MTU, TLS CA)
+    4. Cloud AI Provider API Latency (Anthropic, OpenAI, Gemini, OpenRouter, GitHub) & CDN Speed
+    5. Hardware & Software Performance (CPU Power Plan & Scheduler, RAM SvcHost Split, GPU HAGS & Gaming MMCSS, Windows UI & Background Apps, WSL2, Ollama)
+    6. Optional Markdown Summary Report (-SaveReport)
 #>
 
 param(
@@ -37,7 +37,7 @@ if ($primaryAdapter) {
 }
 
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "   2. OS NETWORK STACK, QA AUTOMATION PORTS & FILE SYSTEM I/O" -ForegroundColor Cyan
+Write-Host "   2. OS NETWORK STACK, EPHEMERAL PORTS & SSD / FILE SYSTEM I/O" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 $sysProfile = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -ErrorAction SilentlyContinue
 $psched     = Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched' -ErrorAction SilentlyContinue
@@ -47,9 +47,11 @@ $fileSystem = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSyste
 Write-Host ("NetworkThrottlingIndex : {0} (Default=10, Unlocked=4294967295 / 0xffffffff)" -f $sysProfile.NetworkThrottlingIndex)
 Write-Host ("SystemResponsiveness   : {0}% (Default=20%, Unlocked=0%)" -f $sysProfile.SystemResponsiveness)
 Write-Host ("QoS NonBestEffortLimit : {0} (Unlocked=0)" -f $psched.NonBestEffortLimit)
-Write-Host ("QA MaxUserPort         : {0} (Default=N/A [16k ports], Turbo=65534 [55k ports])" -f $tcpParams.MaxUserPort)
-Write-Host ("QA TcpTimedWaitDelay   : {0}s (Default=120s, Turbo=30s)" -f $tcpParams.TcpTimedWaitDelay)
-Write-Host ("NTFS DisableLastAccess : {0} (0=Enabled [Slow], 1=Disabled [Fast I/O])" -f $fileSystem.NtfsDisableLastAccessUpdate)
+Write-Host ("Ephemeral MaxUserPort  : {0} (Default=N/A [16k ports], Target=65534 [55k ports])" -f $tcpParams.MaxUserPort)
+Write-Host ("TcpTimedWaitDelay      : {0}s (Default=120s, Target=30s)" -f $tcpParams.TcpTimedWaitDelay)
+Write-Host ("Win32 LongPathsEnabled : {0} (1=Enabled)" -f $fileSystem.LongPathsEnabled)
+Write-Host ("NTFS DisableLastAccess : {0} (0=Enabled [Slower I/O], 1=Disabled [Faster I/O])" -f $fileSystem.NtfsDisableLastAccessUpdate)
+Write-Host ("NTFS Disable8dot3Names : {0} (1=Disabled legacy short names [Faster I/O])" -f $fileSystem.NtfsDisable8dot3NameCreation)
 
 $activeNics = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" -ErrorAction SilentlyContinue
 $tcpNoDelayStatus = "N/A"
@@ -62,7 +64,7 @@ foreach ($nic in $activeNics) {
 }
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
-Write-Host "   3. CORPORATE NETWORK, IPV6 HAPPY-EYEBALLS & VPN MTU AUDIT" -ForegroundColor Cyan
+Write-Host "   3. CORPORATE NETWORK, IPV6 ROUTING & VPN MTU CHECK" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 $vpnProcs = Get-Process | Where-Object { $_.ProcessName -match 'warp|vpn|wireguard|openvpn|tailscale|zerotier|cisco|forti|globalprotect|zscaler|steam|onedrive|dropbox' }
 if ($vpnProcs) {
@@ -71,17 +73,15 @@ if ($vpnProcs) {
     Write-Host "[OK] No active VPN/Tunnel or heavy background sync processes detected." -ForegroundColor Green
 }
 
-# Check IPv6 vs IPv4 routing to detect Happy Eyeballs lag on Node.js / Claude Code
 $ipv4Test = curl.exe -4 -o NUL -s -m 3 -w "%{http_code}" https://api.anthropic.com 2>$null
 $ipv6Test = curl.exe -6 -o NUL -s -m 2 -w "%{http_code}" https://api.anthropic.com 2>$null
 $nodeOpts = [Environment]::GetEnvironmentVariable('NODE_OPTIONS', 'User')
 $nodeCa   = [Environment]::GetEnvironmentVariable('NODE_USE_SYSTEM_CA', 'User')
 Write-Host "IPv4 Connectivity (Anthropic) : HTTP $ipv4Test"
-Write-Host "IPv6 Connectivity (Anthropic) : $(if ($ipv6Test -and $ipv6Test -ne '000') { "HTTP $ipv6Test (Working)" } else { "Unreachable / Timeout (Potential Happy-Eyeballs lag if not ipv4first)" })"
-Write-Host "NODE_OPTIONS (IPv4 Priority)  : $nodeOpts (Recommended: --dns-result-order=ipv4first)"
-Write-Host "NODE_USE_SYSTEM_CA (Corp SSL) : $nodeCa (Recommended: 1)"
+Write-Host "IPv6 Connectivity (Anthropic) : $(if ($ipv6Test -and $ipv6Test -ne '000') { "HTTP $ipv6Test (Working)" } else { "Unreachable / Timeout (Requires ipv4first to avoid connection delay)" })"
+Write-Host "NODE_OPTIONS (IPv4 Priority)  : $nodeOpts (Target: --dns-result-order=ipv4first)"
+Write-Host "NODE_USE_SYSTEM_CA (Corp SSL) : $nodeCa (Target: 1)"
 
-# Probe non-fragmented MTU ceiling (detects VPN MTU Blackholes that freeze SSE streams)
 $mtuCeiling = 1500
 foreach ($payload in @(1472, 1440, 1400, 1360)) {
     $pingMtu = ping -n 1 -w 1000 -f -l $payload 8.8.8.8 2>$null
@@ -90,10 +90,10 @@ foreach ($payload in @(1472, 1440, 1400, 1360)) {
         break
     }
 }
-Write-Host ("Effective Non-Fragmented MTU  : {0} bytes {1}" -f $mtuCeiling, $(if ($mtuCeiling -lt 1500) { "(VPN/Tunnel overhead detected!)" } else { "(Full 1500 Ethernet MTU)" }))
+Write-Host ("Effective Non-Fragmented MTU  : {0} bytes {1}" -f $mtuCeiling, $(if ($mtuCeiling -lt 1500) { "(Reduced MTU due to VPN/Tunnel overhead)" } else { "(Standard 1500 Ethernet MTU)" }))
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
-Write-Host "   4. CLOUD AI PROVIDER API LATENCY, DNS RACE & CDN SPEED" -ForegroundColor Cyan
+Write-Host "   4. CLOUD AI PROVIDER API LATENCY & DOWNLOAD SPEED" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 $gw = ($activeNics | Where-Object { $_.DefaultIPGateway } | Select-Object -First 1).DefaultIPGateway[0]
 $gwPingMs = "N/A"
@@ -134,29 +134,49 @@ if ($speedBytes -match '^\d+') {
 }
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
-Write-Host "   5. LOCAL AI WORKSTATION, WSL2 & AGENTIC TOOLING READINESS" -ForegroundColor Cyan
+Write-Host "   5. HARDWARE, SOFTWARE, GAMING & AI WORKSTATION READINESS" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 $powerScheme = powercfg /getactivescheme
-$hags = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -ErrorAction SilentlyContinue).HwSchMode
-$longPaths = $fileSystem.LongPathsEnabled
-$flashAttn = [Environment]::GetEnvironmentVariable('OLLAMA_FLASH_ATTENTION', 'User')
-$kvCache   = [Environment]::GetEnvironmentVariable('OLLAMA_KV_CACHE_TYPE', 'User')
-$ollamaParallel = [Environment]::GetEnvironmentVariable('OLLAMA_NUM_PARALLEL', 'User')
+$prioControl = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' -ErrorAction SilentlyContinue).Win32PrioritySeparation
+$pwrThrottle = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ErrorAction SilentlyContinue).PowerThrottlingOff
+$svcSplit    = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -ErrorAction SilentlyContinue).SvcHostSplitThresholdInKB
+$osMem       = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
+$totalRamGB  = if ($osMem) { [math]::Round($osMem.TotalVisibleMemorySize / 1MB, 1) } else { "N/A" }
+$freeRamGB   = if ($osMem) { [math]::Round($osMem.FreePhysicalMemory / 1MB, 2) } else { "N/A" }
+
+$hags        = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -ErrorAction SilentlyContinue).HwSchMode
+$dxFlip      = (Get-ItemProperty 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -ErrorAction SilentlyContinue).DirectXUserGlobalSettings
+$gamesMmcss  = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' -ErrorAction SilentlyContinue
+$gameDvr     = (Get-ItemProperty 'HKCU:\System\GameConfigStore' -ErrorAction SilentlyContinue).GameDVR_Enabled
+$menuDelay   = (Get-ItemProperty 'HKCU:\Control Panel\Desktop' -ErrorAction SilentlyContinue).MenuShowDelay
+$bgAppsOff   = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' -ErrorAction SilentlyContinue).GlobalUserDisabled
+
+$flashAttn   = [Environment]::GetEnvironmentVariable('OLLAMA_FLASH_ATTENTION', 'User')
+$kvCache     = [Environment]::GetEnvironmentVariable('OLLAMA_KV_CACHE_TYPE', 'User')
+$ollamaPar   = [Environment]::GetEnvironmentVariable('OLLAMA_NUM_PARALLEL', 'User')
 $wslMirrored = if ((Test-Path "$HOME\.wslconfig") -and ((Get-Content "$HOME\.wslconfig" -Raw) -match 'networkingMode\s*=\s*mirrored')) { "Enabled (Mirrored)" } else { "Default NAT / Not Configured" }
 
-Write-Host "Active Power Plan      : $powerScheme"
-Write-Host "GPU HAGS (HwSchMode)   : $hags (1=Disabled, 2=Enabled)"
-Write-Host "Win32 LongPathsEnabled : $longPaths (1=Enabled)"
-Write-Host "WSL2 Network Mode      : $wslMirrored"
-Write-Host "OLLAMA_FLASH_ATTENTION : $flashAttn (Recommended=1)"
-Write-Host "OLLAMA_KV_CACHE_TYPE   : $kvCache (Recommended=q8_0)"
-Write-Host "OLLAMA_NUM_PARALLEL    : $ollamaParallel (Recommended=2)"
+Write-Host "Active Power Plan         : $powerScheme"
+Write-Host "CPU PrioritySeparation    : $prioControl (Default=2, Target=38 [0x26 Foreground Boost])"
+Write-Host "CPU PowerThrottlingOff    : $pwrThrottle (1=Disabled background throttling)"
+Write-Host "System Physical RAM       : $freeRamGB GB Free / $totalRamGB GB Total"
+Write-Host "RAM SvcHostSplitThreshold : $svcSplit KB (Consolidates svchost.exe when >= Total RAM KB)"
+Write-Host "GPU HAGS (HwSchMode)      : $hags (1=Disabled, 2=Enabled)"
+Write-Host "DirectX Windowed Flip     : $dxFlip"
+Write-Host "MMCSS Games Priority      : GPU Priority=$($gamesMmcss.'GPU Priority') (Target=8) | CPU Priority=$($gamesMmcss.Priority) (Target=6)"
+Write-Host "Background GameDVR        : $gameDvr (0=Disabled [Higher FPS], 1=Enabled)"
+Write-Host "UI MenuShowDelay          : $menuDelay ms (Default=400, Target=10)"
+Write-Host "Store Background Apps Off : $bgAppsOff (1=Disabled background wakeups)"
+Write-Host "WSL2 Network Mode         : $wslMirrored"
+Write-Host "OLLAMA_FLASH_ATTENTION    : $flashAttn (Target=1)"
+Write-Host "OLLAMA_KV_CACHE_TYPE      : $kvCache (Target=q8_0)"
+Write-Host "OLLAMA_NUM_PARALLEL       : $ollamaPar (Target=2)"
 
 if (Get-Command git -ErrorAction SilentlyContinue) {
     $gitPostBuffer = git config --global http.postBuffer
     $gitLongPaths  = git config --global core.longpaths
     $gitSslBackend = git config --global http.sslBackend
-    Write-Host "Git Global Config      : longpaths=$gitLongPaths | postBuffer=$gitPostBuffer | sslBackend=$gitSslBackend"
+    Write-Host "Git Global Config         : longpaths=$gitLongPaths | postBuffer=$gitPostBuffer | sslBackend=$gitSslBackend"
 }
 
 $gpuSummary = "N/A"
@@ -172,23 +192,24 @@ if ($SaveReport) {
         $ReportPath = Join-Path $SkillRoot "BENCHMARK_REPORT.md"
     }
     $reportMd = @"
-# 📊 Workstation Network & AI Readiness Scorecard
+# Workstation Hardware, Software, Network & AI Diagnostic Report
 
 - **Timestamp:** $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 - **Workstation:** `$env:COMPUTERNAME`
 - **Primary Adapter:** `$($primaryAdapter.InterfaceDescription)` (`$($primaryAdapter.LinkSpeed)`)
+- **RAM:** `$freeRamGB GB Free / $totalRamGB GB Total`
 - **GPU:** `$gpuSummary`
 
-## 1. Network & Hardware Unlocks
-| Parameter | Current Value | Optimal Target |
+## 1. Network & Hardware Settings
+| Parameter | Current Value | Target Value |
 | :--- | :--- | :--- |
 | **Receive / Transmit Buffers** | `$rxBuf / $txBuf` | `2048 / 2048` |
 | **Energy Efficient Ethernet (EEE)** | `$eeeVal` | `Off` |
 | **Interrupt Moderation Rate (ITR)** | `$itrVal` | `Off` |
 | **OS NetworkThrottlingIndex** | `$($sysProfile.NetworkThrottlingIndex)` | `4294967295 (0xffffffff)` |
-| **TCPNoDelay (Instant SSE)** | `$tcpNoDelayStatus` | `1` |
-| **QA Ephemeral MaxUserPort** | `$($tcpParams.MaxUserPort)` | `65534 (55k ports)` |
-| **QA TcpTimedWaitDelay** | `$($tcpParams.TcpTimedWaitDelay)s` | `30s` |
+| **TCPNoDelay (Nagle Disabled)** | `$tcpNoDelayStatus` | `1` |
+| **Ephemeral MaxUserPort** | `$($tcpParams.MaxUserPort)` | `65534 (55k ports)` |
+| **TcpTimedWaitDelay** | `$($tcpParams.TcpTimedWaitDelay)s` | `30s` |
 | **Effective Non-Fragmented MTU** | `$mtuCeiling bytes` | `1500 bytes` |
 
 ## 2. Latency & Cloud AI API Handshake
@@ -202,15 +223,21 @@ if ($SaveReport) {
 | **Google Gemini (`googleapis.com`)** | `$($aiResults["Google Gemini (Antigravity)"])` |
 | **OpenRouter (`openrouter.ai`)** | `$($aiResults["OpenRouter (OpenCode / Multi)"])` |
 
-## 3. AI, Tooling & WSL2 Configuration
-| Parameter | Current Value | Optimal Target |
+## 3. Hardware, Software, Gaming & AI Configuration
+| Parameter | Current Value | Target Value |
 | :--- | :--- | :--- |
+| **CPU PrioritySeparation** | `$prioControl` | `38 (0x26)` |
+| **RAM SvcHostSplitThresholdInKB** | `$svcSplit KB` | `>= Total RAM KB` |
 | **GPU HAGS (`HwSchMode`)** | `$hags` | `2 (Enabled)` |
+| **DirectX Windowed Flip Model** | `$dxFlip` | `SwapEffectUpgradeEnable=1;` |
+| **MMCSS Games Priority (GPU / CPU)** | `$($gamesMmcss.'GPU Priority') / $($gamesMmcss.Priority)` | `8 / 6` |
+| **Background GameDVR Capture** | `$gameDvr` | `0 (Disabled)` |
+| **NTFS LastAccess / 8dot3 Names** | `$($fileSystem.NtfsDisableLastAccessUpdate) / $($fileSystem.NtfsDisable8dot3NameCreation)` | `1 / 1 (Disabled)` |
 | **Ollama Flash Attention & KV Cache** | `FA=$flashAttn / KV=$kvCache` | `FA=1 / KV=q8_0` |
 | **Node.js Corporate / IPv4 Priority** | `NODE_OPTIONS=$nodeOpts / CA=$nodeCa` | `--dns-result-order=ipv4first / CA=1` |
 | **Git SChannel SSL & LongPaths** | `ssl=$gitSslBackend / longpaths=$gitLongPaths` | `schannel / true` |
 | **WSL2 Networking Mode** | `$wslMirrored` | `Enabled (Mirrored)` |
 "@
     Set-Content -Path $ReportPath -Value $reportMd -Encoding UTF8
-    Write-Host "`n[OK] Saved Markdown Scorecard Report to: $ReportPath" -ForegroundColor Green
+    Write-Host "`n[OK] Saved diagnostic report to: $ReportPath" -ForegroundColor Green
 }

@@ -1,8 +1,9 @@
 <#
 .SYNOPSIS
     System Settings Backup & Rollback for `agentic-workstation-optimizer`.
-    Saves a JSON snapshot of current Windows Registry network keys, NIC hardware properties,
-    User environment variables, Git global settings, and TCP dynamic port ranges before optimization.
+    Saves a JSON snapshot of current Windows Registry keys (Network, CPU Priority, GPU,
+    RAM, Multimedia Games Priority, UI), NIC hardware properties, User environment variables,
+    and Git global settings before optimization.
     Restores original workstation settings when called with `-Action Rollback`.
 #>
 
@@ -44,13 +45,19 @@ if ($Action -eq "Backup") {
         }
     }
 
-    $sysProfile = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -ErrorAction SilentlyContinue
-    $psched     = Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched' -ErrorAction SilentlyContinue
-    $tcpParams  = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' -ErrorAction SilentlyContinue
-    $gfxDrivers = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -ErrorAction SilentlyContinue
-    $fileSystem = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -ErrorAction SilentlyContinue
-    $gameBar    = Get-ItemProperty 'HKCU:\Software\Microsoft\GameBar' -ErrorAction SilentlyContinue
-    $gameDvr    = Get-ItemProperty 'HKCU:\System\GameConfigStore' -ErrorAction SilentlyContinue
+    $sysProfile  = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -ErrorAction SilentlyContinue
+    $gamesTask   = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games' -ErrorAction SilentlyContinue
+    $prioCtrl    = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' -ErrorAction SilentlyContinue
+    $ctrlRoot    = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -ErrorAction SilentlyContinue
+    $pwrThrottle = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ErrorAction SilentlyContinue
+    $psched      = Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched' -ErrorAction SilentlyContinue
+    $tcpParams   = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' -ErrorAction SilentlyContinue
+    $gfxDrivers  = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers' -ErrorAction SilentlyContinue
+    $fileSystem  = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -ErrorAction SilentlyContinue
+    $gameBar     = Get-ItemProperty 'HKCU:\Software\Microsoft\GameBar' -ErrorAction SilentlyContinue
+    $gameDvr     = Get-ItemProperty 'HKCU:\System\GameConfigStore' -ErrorAction SilentlyContinue
+    $desktopUi   = Get-ItemProperty 'HKCU:\Control Panel\Desktop' -ErrorAction SilentlyContinue
+    $bgApps      = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' -ErrorAction SilentlyContinue
 
     $activeNicConfig = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" |
         Where-Object { $_.Description -notmatch 'Virtual|VPN|WARP|Loopback' } | Select-Object -First 1
@@ -66,18 +73,28 @@ if ($Action -eq "Backup") {
         InterfaceRegistryPath   = $ifRegPath
         ActivePowerSchemeGuid   = $activePowerGuid
         Registry = [ordered]@{
-            NetworkThrottlingIndex = $sysProfile.NetworkThrottlingIndex
-            SystemResponsiveness   = $sysProfile.SystemResponsiveness
-            NonBestEffortLimit     = $psched.NonBestEffortLimit
-            MaxUserPort            = $tcpParams.MaxUserPort
-            TcpTimedWaitDelay      = $tcpParams.TcpTimedWaitDelay
-            HwSchMode              = $gfxDrivers.HwSchMode
-            LongPathsEnabled       = $fileSystem.LongPathsEnabled
-            NtfsDisableLastAccess  = $fileSystem.NtfsDisableLastAccessUpdate
-            AllowAutoGameMode      = $gameBar.AllowAutoGameMode
-            GameDVR_Enabled        = $gameDvr.GameDVR_Enabled
-            TcpAckFrequency        = if ($ifProps) { $ifProps.TcpAckFrequency } else { $null }
-            TCPNoDelay             = if ($ifProps) { $ifProps.TCPNoDelay } else { $null }
+            NetworkThrottlingIndex     = $sysProfile.NetworkThrottlingIndex
+            SystemResponsiveness       = $sysProfile.SystemResponsiveness
+            Win32PrioritySeparation    = $prioCtrl.Win32PrioritySeparation
+            SvcHostSplitThresholdInKB  = $ctrlRoot.SvcHostSplitThresholdInKB
+            PowerThrottlingOff         = if ($pwrThrottle) { $pwrThrottle.PowerThrottlingOff } else { $null }
+            GamesGpuPriority           = if ($gamesTask) { $gamesTask.'GPU Priority' } else { $null }
+            GamesPriority              = if ($gamesTask) { $gamesTask.Priority } else { $null }
+            GamesSchedulingCategory    = if ($gamesTask) { $gamesTask.'Scheduling Category' } else { $null }
+            GamesSfioPriority          = if ($gamesTask) { $gamesTask.'SFIO Priority' } else { $null }
+            NonBestEffortLimit         = $psched.NonBestEffortLimit
+            MaxUserPort                = $tcpParams.MaxUserPort
+            TcpTimedWaitDelay          = $tcpParams.TcpTimedWaitDelay
+            HwSchMode                  = $gfxDrivers.HwSchMode
+            LongPathsEnabled           = $fileSystem.LongPathsEnabled
+            NtfsDisableLastAccess      = $fileSystem.NtfsDisableLastAccessUpdate
+            NtfsDisable8dot3Name       = $fileSystem.NtfsDisable8dot3NameCreation
+            AllowAutoGameMode          = $gameBar.AllowAutoGameMode
+            GameDVR_Enabled            = $gameDvr.GameDVR_Enabled
+            MenuShowDelay              = $desktopUi.MenuShowDelay
+            GlobalUserDisabledBgApps   = if ($bgApps) { $bgApps.GlobalUserDisabled } else { $null }
+            TcpAckFrequency            = if ($ifProps) { $ifProps.TcpAckFrequency } else { $null }
+            TCPNoDelay                 = if ($ifProps) { $ifProps.TCPNoDelay } else { $null }
         }
         UserEnv = [ordered]@{
             OLLAMA_FLASH_ATTENTION = [Environment]::GetEnvironmentVariable('OLLAMA_FLASH_ATTENTION', 'User')
@@ -103,7 +120,7 @@ if ($Action -eq "Backup") {
         Set-Content -Path $LatestFile -Value $json -Encoding UTF8
     }
     Write-Host "[OK] Saved system snapshot to: $datedFile" -ForegroundColor Green
-    Write-Host "[OK] Baseline snapshot ready for 1-click rollback ($LatestFile)" -ForegroundColor Green
+    Write-Host "[OK] Baseline snapshot ready for rollback ($LatestFile)" -ForegroundColor Green
     exit 0
 }
 
@@ -127,11 +144,17 @@ if ($Action -eq "Rollback") {
         Write-Host "[OK] Restored Power Plan to $($snap.ActivePowerSchemeGuid)" -ForegroundColor Green
     }
 
-    # 2. Restore User Environment Variables
+    # 2. Restore User Environment Variables & HKCU UI Settings
     foreach ($prop in $snap.UserEnv.PSObject.Properties) {
         [Environment]::SetEnvironmentVariable($prop.Name, $prop.Value, 'User')
     }
-    Write-Host "[OK] Restored User Environment Variables" -ForegroundColor Green
+    if ($null -ne $snap.Registry.MenuShowDelay) {
+        Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'MenuShowDelay' -Value $snap.Registry.MenuShowDelay -Force -ErrorAction SilentlyContinue
+    }
+    if ($null -ne $snap.Registry.GlobalUserDisabledBgApps) {
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' -Name 'GlobalUserDisabled' -Value $snap.Registry.GlobalUserDisabledBgApps -Type DWord -Force -ErrorAction SilentlyContinue
+    }
+    Write-Host "[OK] Restored User Environment Variables & UI Preferences" -ForegroundColor Green
 
     # 3. Restore Git Global Config
     if (Get-Command git -ErrorAction SilentlyContinue) {
@@ -146,12 +169,18 @@ if ($Action -eq "Rollback") {
         exit 0
     }
 
-    # 4. Restore Registry Keys
+    # 4. Restore System Registry Keys
     if ($null -ne $snap.Registry.NetworkThrottlingIndex) {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "NetworkThrottlingIndex" -Value $snap.Registry.NetworkThrottlingIndex -Type DWord -Force
     }
     if ($null -ne $snap.Registry.SystemResponsiveness) {
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value $snap.Registry.SystemResponsiveness -Type DWord -Force
+    }
+    if ($null -ne $snap.Registry.Win32PrioritySeparation) {
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl" -Name "Win32PrioritySeparation" -Value $snap.Registry.Win32PrioritySeparation -Type DWord -Force
+    }
+    if ($null -ne $snap.Registry.SvcHostSplitThresholdInKB) {
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "SvcHostSplitThresholdInKB" -Value $snap.Registry.SvcHostSplitThresholdInKB -Type DWord -Force
     }
     if ($null -ne $snap.Registry.HwSchMode) {
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value $snap.Registry.HwSchMode -Type DWord -Force
