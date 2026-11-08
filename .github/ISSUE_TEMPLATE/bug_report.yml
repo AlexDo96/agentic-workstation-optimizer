@@ -1,0 +1,33 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in a script or agent skill
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the issue clearly.
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Operating Mode
+      options:
+        - "-Mode All (Home PC)"
+        - "-Mode Work (Office / Company PC)"
+        - "-Mode Gaming"
+        - "Diagnostic / Other script"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Windows Version & NIC / GPU Model
+      placeholder: "e.g. Windows 11 23H2, Intel I219-V, RTX 3060"
+  - type: textarea
+    id: logs
+    attributes:
+      label: PowerShell Output / Error Log
+      render: powershell

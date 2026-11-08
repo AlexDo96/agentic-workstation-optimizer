@@ -1,0 +1,19 @@
+name: Feature Request
+description: Suggest a new hardware, software, network, or AI workstation optimization
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Bottleneck
+      description: What Windows hardware, software, network, or AI bottleneck does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Optimization & Rollback Mechanism
+      description: Which registry key, command, or configuration is modified, and how is it restored in backup-and-rollback.ps1?
+    validations:
+      required: true

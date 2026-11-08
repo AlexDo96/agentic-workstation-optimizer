@@ -1,32 +1,59 @@
-# Agentic Workstation Optimizer (`agentic-workstation-optimizer`)
+<div align="center">
 
-**English** | [Đọc bản Tiếng Việt](./README.vi.md)
+# Agentic Workstation Optimizer
 
-A set of PowerShell scripts and AI Agent skill definitions (for Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf, and GitHub Copilot) to diagnose and optimize Windows hardware, software, network speed, gaming frame pacing, corporate Cloud AI API connectivity, automated testing (Playwright, Appium, API tests), WSL2 networking, and local LLM resource usage (Ollama, GPU).
+**Hardware, Software, Network, Gaming, QA Automation & AI Workstation Optimization for Windows 10/11**
 
-Designed to work safely on both **Company (Office) PCs** (`-Mode Work`) and **Home Gaming / AI PCs** (`-Mode All`), with automatic backup and 1-command rollback.
+[![Release](https://img.shields.io/github/v/release/AlexDo96/agentic-workstation-optimizer?style=flat-square&label=Release&color=blue)](https://github.com/AlexDo96/agentic-workstation-optimizer/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](./LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6?style=flat-square&logo=windows)](https://github.com/AlexDo96/agentic-workstation-optimizer)
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B%20%7C%207%2B-5391FE?style=flat-square&logo=powershell)](https://github.com/AlexDo96/agentic-workstation-optimizer)
+[![AI Agents](https://img.shields.io/badge/AI_Agents-Claude_Code_%7C_Cursor_%7C_Antigravity_%7C_OpenCode_%7C_Codex-7C3AED?style=flat-square)](https://github.com/AlexDo96/agentic-workstation-optimizer)
+
+**English** | [Tiếng Việt](./README.vi.md)
+
+[Why I Built This](#why-i-built-this) •
+[Quick Start](#quick-start) •
+[What It Optimizes](#what-it-optimizes) •
+[PowerShell CLI](#running-the-scripts-directly-in-powershell) •
+[Benchmarks & Evidence](#real-world-test-results--evidence) •
+[Repository Structure](#repository-structure) •
+[License](#license)
+
+</div>
 
 ---
 
-## Why I built this
+## Overview
+
+`agentic-workstation-optimizer` is a collection of PowerShell scripts and AI Agent skill definitions (compatible with **Google Antigravity**, **Claude Code**, **OpenCode**, **Cursor**, **OpenAI Codex CLI**, **Windsurf**, and **GitHub Copilot**) designed to diagnose and fix common performance bottlenecks on Windows workstations:
+
+- **Hardware & OS Performance:** Unlocks the `Ultimate Performance` power scheme, tunes foreground CPU scheduling (`Win32PrioritySeparation = 38`), consolidates fragmented `svchost.exe` processes in RAM, trims idle background working-set memory (`EmptyWorkingSet`), enables GPU Hardware-Accelerated Scheduling (`HAGS`) & DirectX Windowed Flip Model, and removes NTFS `LastAccess` / `8.3` file I/O overhead.
+- **Network Throughput & Low Latency:** Removes the default Windows 10-packet/ms multimedia cap (`NetworkThrottlingIndex`), increases NIC hardware `Receive/Transmit Buffers` (`256/512` -> `2048`), disables Ethernet sleep states (`EEE`, `ULP`, `ITR`), and disables Nagle's 200ms packet buffering (`TCPNoDelay = 1`).
+- **Corporate Network & Cloud AI Reliability:** Fixes slow AI API calls and SSL errors on office networks by prioritizing IPv4 in Node.js (`--dns-result-order=ipv4first`), configuring Git and Node.js to trust the Windows Certificate Store (`schannel` / `NODE_USE_SYSTEM_CA=1`), and probing non-fragmented VPN MTU ceilings.
+- **Parallel E2E / API Testing & Local AI:** Expands dynamic ephemeral ports from `16,384` to `55,535` (`MaxUserPort = 65534`, `TIME_WAIT = 30s`) for Playwright/Appium/API test suites, configures WSL2 Mirrored Networking, and enables Ollama Flash Attention + 8-bit KV cache quantization.
+- **Safe for Both Home (`-Mode All`) and Office (`-Mode Work`) PCs:** Automatically backs up all system settings to `backups/latest-snapshot.json` before making any change, with 1-command rollback.
+
+---
+
+## Why I Built This
 
 Out of the box, Windows 10 and 11 configure CPU scheduling, power management, file system I/O, and network adapters for power saving and legacy compatibility rather than low latency or heavy developer/gaming workloads:
-- **Hardware & OS bottlenecks:** Default Windows power plans park CPU cores and throttle background compilers/containers; `svchost.exe` splits into dozens of separate processes on 16GB–64GB RAM machines; NTFS updates `LastAccess` timestamps and legacy 8.3 short names on every file read across `node_modules` or `.venv`; and background `GameDVR` screen recording + Windows Update P2P uploads consume GPU/CPU cycles and bandwidth during games or builds.
-- **Network throttling on fast fiber connections:** A 10-packet-per-millisecond multimedia cap (`NetworkThrottlingIndex`), small 256/512 NIC buffers, and Ethernet sleep states (`EEE`/`ULP`) often cap a 700–1000 Mbps fiber connection at ~200–250 Mbps and cause ping spikes in games.
-- **Slow AI API calls or SSL errors on corporate networks:** Office networks frequently have partial IPv6 setups without external IPv6 routing, causing Node.js tools (Claude Code, OpenCode, MCP servers) to wait for IPv6 timeouts before falling back to IPv4 (adding 0.5–1.5s to requests). Corporate SSL inspection firewalls (Zscaler, Fortinet) also break Git and Node.js unless they are configured to trust the Windows certificate store.
-- **AI responses freezing mid-stream over VPN:** Corporate VPN tunnels reduce maximum packet size (MTU) below 1500 bytes. When large packets are dropped, long streaming responses from Claude or OpenAI can hang.
-- **Port exhaustion during parallel E2E / API test runs:** Windows only allocates ~16,000 dynamic ephemeral ports by default and holds closed connections in `TIME_WAIT` for 120 seconds, which quickly runs out during parallel Playwright, Appium, or API load tests.
-- **WSL2 / Docker losing internet on VPN** or holding onto gigabytes of RAM, plus **idle Ollama models and orphaned WebDriver processes** (`chromedriver`, `geckodriver`, `msedgedriver`) occupying GPU VRAM and system RAM.
 
-This repository brings all of these hardware, software, network, gaming, and AI optimizations together into clear scripts, backed by an automatic snapshot before any change is made.
+1. **Hardware & OS bottlenecks:** Default Windows power plans park CPU cores and throttle background compilers/containers; `svchost.exe` splits into dozens of separate processes on 16GB–64GB RAM machines; NTFS updates `LastAccess` timestamps and legacy 8.3 short names on every file read across `node_modules` or `.venv`; and background `GameDVR` screen recording + Windows Update P2P uploads consume GPU/CPU cycles and bandwidth during games or builds.
+2. **Network throttling on fast fiber connections:** A 10-packet-per-millisecond multimedia cap (`NetworkThrottlingIndex`), small 256/512 NIC buffers, and Ethernet sleep states (`EEE`/`ULP`) often cap a 700–1000 Mbps fiber connection at ~200–250 Mbps and cause ping spikes in games.
+3. **Slow AI API calls or SSL errors on corporate networks:** Office networks frequently have partial IPv6 setups without external IPv6 routing, causing Node.js tools (Claude Code, OpenCode, MCP servers) to wait for IPv6 timeouts before falling back to IPv4 (adding 0.5–1.5s to requests). Corporate SSL inspection firewalls (Zscaler, Fortinet) also break Git and Node.js unless they are configured to trust the Windows certificate store.
+4. **AI responses freezing mid-stream over VPN:** Corporate VPN tunnels reduce maximum packet size (MTU) below 1500 bytes. When large packets are dropped, long streaming responses from Claude or OpenAI can hang.
+5. **Port exhaustion during parallel E2E / API test runs:** Windows only allocates ~16,000 dynamic ephemeral ports by default and holds closed connections in `TIME_WAIT` for 120 seconds, which quickly runs out during parallel Playwright, Appium, or API load tests.
+6. **WSL2 / Docker losing internet on VPN** or holding onto gigabytes of RAM, plus **idle Ollama models and orphaned WebDriver processes** (`chromedriver`, `geckodriver`, `msedgedriver`) occupying GPU VRAM and system RAM.
 
 ---
 
-## Installation
+## Quick Start
+
+### Install Across All AI Agents
 
 Requirements: Windows 10/11 and PowerShell.
-
-Clone the repository and run `install.ps1` to copy the skill, slash command, and subagent files into your local AI agent configuration folders:
 
 ```powershell
 git clone https://github.com/AlexDo96/agentic-workstation-optimizer.git
@@ -34,63 +61,38 @@ cd agentic-workstation-optimizer
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-### How to use in your AI Agent / IDE
+### Usage in Your AI Agent / IDE
 
-| AI Agent / IDE | How to run |
-| :--- | :--- |
-| **Claude Code CLI** | Type `/agentic-workstation-optimizer` or ask `@network-doctor` |
-| **OpenCode CLI** | Type `/agentic-workstation-optimizer` or call the `network-doctor` agent |
-| **Google Antigravity** | Ask the agent to use the `agentic-workstation-optimizer` skill or `network-doctor` subagent |
-| **OpenAI Codex CLI** | Ask Codex to run the `agentic-workstation-optimizer` skill |
-| **Cursor IDE** | Mention `@agentic-workstation-optimizer` in chat |
-| **Windsurf / Copilot** | Open the repo; the assistant reads `AGENTS.md` automatically |
-
----
-
-## What it optimizes
-
-### 1. Hardware Performance: CPU, GPU, RAM & SSD Storage
-- **CPU Power & Scheduler:** Unlocks and activates the Windows `Ultimate Performance` power plan (or `High performance`), sets AC minimum/maximum processor state to `100%` to prevent core parking/downclocking stutters, sets `Win32PrioritySeparation = 38` (`0x26`) for responsive foreground apps and games while keeping background builds running smoothly, and disables background CPU power throttling (`PowerThrottlingOff = 1`) for Docker, WSL2, and compilers.
-- **GPU & Gaming Frame Pacing:** Enables Hardware-Accelerated GPU Scheduling (`HAGS / HwSchMode = 2`), enables DirectX Windowed Flip Model (`SwapEffectUpgradeEnable=1;`) to reduce input latency in borderless windowed games, enables Windows Auto Game Mode, disables background `GameDVR` recording overhead (`GameDVR_Enabled = 0`), and configures the Windows Multimedia Class Scheduler (`MMCSS Tasks\Games`) to `GPU Priority = 8`, `Priority = 6`, and `Scheduling Category = High`.
-- **RAM Consolidation & Active Memory Trim:** Sets `SvcHostSplitThresholdInKB` to match your total physical RAM so Windows consolidates dozens of separate `svchost.exe` processes. Includes `scripts/free-ai-resources.ps1`, which calls the native Win32 `EmptyWorkingSet` API (`psapi.dll`) to trim unused working-set pages from idle background apps back to free physical RAM.
-- **SSD & File System I/O:** Enables Win32 long paths (`LongPathsEnabled = 1`), disables NTFS `LastAccess` timestamp writes (`disablelastaccess = 1`), disables legacy 8.3 short filename creation (`8dot3name set 1`) for faster operations on `node_modules` / `.venv` / game folders, and ensures SSD TRIM (`DisableDeleteNotify = 0`) is enabled.
-
-### 2. Windows Software, UI Responsiveness & Background Cleanup
-- Reduces desktop menu delay (`MenuShowDelay = 10` ms instead of 400 ms).
-- Disables unnecessary background wakeups from Microsoft Store apps (`GlobalUserDisabled = 1`).
-- Disables Windows Update Delivery Optimization P2P uploads (`DODownloadMode = 0`) so background peer uploads never cause ping spikes during games or video calls.
-- Cleans duplicate `MicrosoftEdgeAutoLaunch_*` startup entries and clears stale files in `%TEMP%`.
-
-### 3. Network Stack & NIC Hardware Tuning
-- Removes the default Windows packet throttling cap (`NetworkThrottlingIndex = 0xffffffff`, `SystemResponsiveness = 0`) and unlocks the 20% QoS reserved bandwidth limit (`NonBestEffortLimit = 0`).
-- Detects the active network adapter (Intel, Realtek, Broadcom, MediaTek) and increases hardware `ReceiveBuffers` and `TransmitBuffers` from `256/512` to `2048`.
-- Disables adapter power-saving states (`Energy Efficient Ethernet - EEE`, `Ultra Low Power Mode - ULP`, `Green Ethernet`) and interrupt moderation (`ITR = Off`).
-- Enables `TCPNoDelay = 1` and `TcpAckFrequency = 1` (disables Nagle's 200ms packet buffering) for lower latency in online games and faster AI streaming.
-
-### 4. Corporate Network & Cloud AI Compatibility (`-Mode Work` Safe)
-- **IPv4 priority for Node.js (`NODE_OPTIONS=--dns-result-order=ipv4first`):** Prevents Node.js tools (Claude Code, OpenCode, Playwright, MCP servers) from stalling on broken corporate IPv6 routes.
-- **Windows Certificate Store integration:** Sets `NODE_USE_SYSTEM_CA=1` and `git config --global http.sslBackend schannel` so Git and Node.js work cleanly behind corporate SSL inspection proxies without disabling TLS verification.
-- **MTU ceiling check:** Tests non-fragmented packet sizes (`ping -f -l`) to detect VPN tunnel overhead that could stall long streaming responses.
-- *Safety guarantee:* Never changes corporate DNS servers, Active Directory settings, or VPN profiles.
-
-### 5. QA Automation (Playwright, Appium, API Testing) & Developer Tooling
-- **Expands ephemeral port range:** Increases `MaxUserPort` to `65534` (~55,535 dynamic ports) and lowers `TcpTimedWaitDelay` from 120s to 30s to prevent port exhaustion during parallel E2E and API test suites.
-- **Git & Python network resilience:** Sets `git http.postBuffer = 500MB` and increases `UV_HTTP_TIMEOUT` / `PIP_DEFAULT_TIMEOUT` to 120s for large package downloads.
-
-### 6. Local AI (Ollama / GPU), WSL2 & Memory Cleanup
-- Sets `OLLAMA_FLASH_ATTENTION = 1` and 8-bit KV cache quantization (`OLLAMA_KV_CACHE_TYPE = q8_0`), cutting context VRAM usage by roughly half.
-- **Frees GPU VRAM, closes leftover test drivers, and trims RAM (`scripts/free-ai-resources.ps1`):** Stops idle Ollama models sitting in GPU memory (`ollama stop`), closes orphaned WebDriver processes (`chromedriver`, `geckodriver`, `msedgedriver`), and trims background process working sets.
-- **WSL2 Mirrored Networking & RAM Reclaim (`scripts/optimize-wsl2.ps1`):** Configures `~/.wslconfig` with `networkingMode=mirrored`, `dnsTunneling=true`, `autoProxy=true`, and `autoMemoryReclaim=gradual` so WSL2/Docker stays connected on corporate VPNs and returns unused RAM to Windows.
-
-### 7. Automatic Backup & Rollback (`scripts/backup-and-rollback.ps1`)
-- Before `optimize-workstation.ps1` changes any setting, it saves your current registry values, power plan, NIC properties, environment variables, and Git config to `backups/latest-snapshot.json`.
-- You can restore all settings back to their original values at any time with a single command.
+| AI Agent / IDE | How to Invoke | Installed Files |
+| :--- | :--- | :--- |
+| **Claude Code CLI** | Type `/agentic-workstation-optimizer` or ask `@network-doctor` | `~/.claude/skills/`, `~/.claude/commands/`, `~/.claude/agents/` |
+| **OpenCode CLI** | Type `/agentic-workstation-optimizer` or call `network-doctor` | `~/.config/opencode/skills/`, `~/.config/opencode/commands/`, `~/.config/opencode/agent/` |
+| **Google Antigravity** | Ask the agent to use `agentic-workstation-optimizer` or `network-doctor` | `~/.gemini/config/skills/`, `~/.gemini/config/agents/` |
+| **OpenAI Codex CLI** | Ask Codex to run the `agentic-workstation-optimizer` skill | `~/.codex/skills/` |
+| **Cursor IDE** | Mention `@agentic-workstation-optimizer` in chat | `.cursor/rules/agentic-workstation-optimizer.mdc` |
+| **Windsurf / Copilot** | Open the repository; the assistant reads `AGENTS.md` automatically | `AGENTS.md`, `.agents/skills/` |
 
 ---
 
-## Running the scripts directly in PowerShell
+## What It Optimizes
 
-You can run the scripts manually in **PowerShell (Admin)** without an AI agent, choosing the mode that fits your PC:
+| Category | Key Settings Applied | Mode Scope |
+| :--- | :--- | :--- |
+| **CPU Power & Scheduler** | Unlocks `Ultimate Performance` power plan (`100%` AC min/max state), sets `Win32PrioritySeparation = 38` (`0x26`), disables background CPU throttling (`PowerThrottlingOff = 1`). | `All`, `Work`, `Gaming` |
+| **GPU & Frame Pacing** | Enables GPU HAGS (`HwSchMode = 2`), DirectX Windowed Flip Model (`SwapEffectUpgradeEnable=1;`), Auto Game Mode, disables background `GameDVR` capture, sets `MMCSS Tasks\Games` (`GPU Priority = 8`, `Priority = 6`). | `All`, `Gaming` (`HAGS` in `Work`) |
+| **RAM & Working Set** | Sets `SvcHostSplitThresholdInKB` to match total physical RAM; trims idle background working-set pages via Win32 `EmptyWorkingSet` (`psapi.dll`). | `All`, `Work`, `Gaming` |
+| **SSD & NTFS File I/O** | Enables `LongPathsEnabled = 1`, disables NTFS `LastAccess` writes (`disablelastaccess = 1`), disables legacy 8.3 short names (`8dot3name set 1`), verifies SSD `TRIM`. | `All`, `Work`, `Gaming` |
+| **Windows UI & Background** | Sets `MenuShowDelay = 10` ms, disables background Store app wakeups (`GlobalUserDisabled = 1`), disables Windows Update P2P uploads (`DODownloadMode = 0`), cleans `%TEMP%`. | `All`, `Work`, `Gaming` |
+| **Network Stack & NIC** | Sets `NetworkThrottlingIndex = 0xffffffff`, `SystemResponsiveness = 0`, `NonBestEffortLimit = 0`, NIC `Receive/Transmit Buffers = 2048`, disables `EEE`/`ULP`/`ITR`, sets `TCPNoDelay = 1`. | `All`, `Work`, `Gaming` |
+| **Corporate Cloud AI** | Sets `NODE_OPTIONS=--dns-result-order=ipv4first`, `NODE_USE_SYSTEM_CA=1`, `git http.sslBackend=schannel`, probes VPN MTU ceiling *(never touches corporate DNS, AD, or VPN profiles)*. | `All`, `Work` |
+| **QA Automation & Tooling** | Expands ephemeral ports to `55,535` (`MaxUserPort = 65534`), lowers `TcpTimedWaitDelay = 30s`, sets `git http.postBuffer = 500MB`, `UV_HTTP_TIMEOUT = 120s`. | `All`, `Work` |
+| **Local AI & WSL2** | Sets `OLLAMA_FLASH_ATTENTION = 1`, `OLLAMA_KV_CACHE_TYPE = q8_0`, unloads idle Ollama models, closes orphaned WebDrivers, configures `.wslconfig` (`networkingMode=mirrored`, `autoMemoryReclaim=gradual`). | `All`, `Work` |
+
+---
+
+## Running the Scripts Directly in PowerShell
+
+You can run the scripts manually in **PowerShell (Admin)** without an AI agent:
 
 ```powershell
 # 1. Run read-only diagnostics and save a summary table to BENCHMARK_REPORT.md
@@ -117,7 +119,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup-and-rollback.ps1 -Acti
 
 ---
 
-## Real-world test results & Evidence
+## Real-World Test Results & Evidence
 
 Tested on an **Intel Core i5-8600K / 16GB RAM / NVIDIA GeForce RTX 3060 (12GB VRAM) / Intel I219-V Gigabit Ethernet** workstation connected via an SDMC AX3000 Wi-Fi 6 Mesh node (`NR3053`) to a Viettel GPON fiber line (`NPE3036GV`):
 
@@ -146,7 +148,9 @@ Tested on an **Intel Core i5-8600K / 16GB RAM / NVIDIA GeForce RTX 3060 (12GB VR
 
 ### 3. Actual Terminal Output Logs
 
-#### System RAM & GPU VRAM Cleanup (`scripts/free-ai-resources.ps1`)
+<details open>
+<summary><b>System RAM & GPU VRAM Cleanup Log (<code>scripts/free-ai-resources.ps1</code>)</b></summary>
+
 ```text
 ================================================================
    FREEING GPU VRAM, SYSTEM RAM & LEFTOVER PROCESSES
@@ -160,7 +164,11 @@ System RAM Free After  : 9129 MB (+1848 MB freed)
 GPU VRAM After         : 1300 MiB, 10816 MiB, 12288 MiB
 ```
 
-#### Workstation Optimization & Diagnostic Verification (`scripts/optimize-workstation.ps1` & `scripts/diagnose-network-ai.ps1`)
+</details>
+
+<details>
+<summary><b>Full Hardware, Network & Cloud AI Diagnostic Log (<code>scripts/diagnose-network-ai.ps1</code>)</b></summary>
+
 ```text
 Primary Adapter Selected: Ethernet 2 (Intel(R) Ethernet Connection (7) I219-V)
 DisplayName                      DisplayValue RegistryKeyword
@@ -199,3 +207,58 @@ OLLAMA_FLASH_ATTENTION    : 1 (Target=1)
 OLLAMA_KV_CACHE_TYPE      : q8_0 (Target=q8_0)
 NVIDIA GPU Status         : NVIDIA GeForce RTX 3060, 591.74, 49 C, 17.51 W, 1300 MiB, 12288 MiB
 ```
+
+</details>
+
+---
+
+## Repository Structure
+
+```text
+agentic-workstation-optimizer/
+├── .claude/
+│   ├── agents/network-doctor.md                  # Claude Code subagent definition
+│   └── commands/agentic-workstation-optimizer.md # Claude Code slash command
+├── .cursor/
+│   └── rules/agentic-workstation-optimizer.mdc   # Cursor IDE rule
+├── .gemini/
+│   └── agents/network-doctor.md                  # Google Antigravity subagent definition
+├── .github/
+│   ├── ISSUE_TEMPLATE/                           # Bug report & feature request forms
+│   ├── workflows/ci.yml                          # PowerShell AST syntax & installer CI
+│   └── PULL_REQUEST_TEMPLATE.md
+├── .opencode/
+│   └── agent/network-doctor.md                   # OpenCode subagent definition
+├── assets/                                       # Real-world Speedtest benchmark images
+├── references/
+│   └── router-optimization.md                    # Home GPON ONT & Wi-Fi 6 (160MHz) guide
+├── scripts/
+│   ├── backup-and-rollback.ps1                   # Automatic JSON snapshot & 1-click rollback
+│   ├── diagnose-network-ai.ps1                   # Read-only hardware, network & AI audit
+│   ├── free-ai-resources.ps1                     # Win32 EmptyWorkingSet RAM trim & VRAM cleanup
+│   ├── optimize-workstation.ps1                  # Main optimizer (-Mode All | Work | Gaming)
+│   └── optimize-wsl2.ps1                         # WSL2 Mirrored Networking & RAM reclaim
+├── AGENTS.md                                     # Universal instructions for Windsurf / Copilot
+├── CHANGELOG.md                                  # Release history
+├── CONTRIBUTING.md                               # Contribution & rollback requirements
+├── install.ps1                                   # Multi-agent skill & subagent installer
+├── LICENSE                                       # MIT License
+├── package.json                                  # Package metadata & npm scripts
+├── README.md                                     # Documentation (English)
+├── README.vi.md                                  # Documentation (Vietnamese)
+├── SECURITY.md                                   # Security & privacy guarantees
+└── SKILL.md                                      # Core Skill specification
+```
+
+---
+
+## Contributing & Security
+
+- Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before submitting a Pull Request. Every new system tweak must include full backup and rollback support in `scripts/backup-and-rollback.ps1`.
+- See [SECURITY.md](./SECURITY.md) for details on privacy guarantees (zero telemetry, no TLS verification bypass, safe corporate mode).
+
+---
+
+## License
+
+Released under the [MIT License](./LICENSE). Copyright (c) 2026 [Do Hoang Tuan Anh (AlexDo96)](https://github.com/AlexDo96).

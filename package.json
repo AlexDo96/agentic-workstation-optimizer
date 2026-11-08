@@ -1,0 +1,41 @@
+{
+  "name": "agentic-workstation-optimizer",
+  "version": "2.1.0",
+  "description": "PowerShell toolkit and multi-agent skill (Claude Code, Cursor, Google Antigravity, OpenCode, Codex) to diagnose and optimize Windows hardware, software, gaming frame pacing, network throughput, corporate Cloud AI connectivity, E2E testing ports, WSL2, and Ollama.",
+  "main": "SKILL.md",
+  "scripts": {
+    "install-skill": "powershell -ExecutionPolicy Bypass -File ./install.ps1",
+    "diagnose": "powershell -ExecutionPolicy Bypass -File ./scripts/diagnose-network-ai.ps1 -SaveReport",
+    "optimize": "powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1 -Mode All",
+    "optimize:work": "powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1 -Mode Work",
+    "optimize:gaming": "powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1 -Mode Gaming",
+    "free-memory": "powershell -ExecutionPolicy Bypass -File ./scripts/free-ai-resources.ps1",
+    "optimize:wsl2": "powershell -ExecutionPolicy Bypass -File ./scripts/optimize-wsl2.ps1",
+    "rollback": "powershell -ExecutionPolicy Bypass -File ./scripts/backup-and-rollback.ps1 -Action Rollback"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexDo96/agentic-workstation-optimizer.git"
+  },
+  "keywords": [
+    "windows",
+    "powershell",
+    "optimization",
+    "ai-agent",
+    "claude-code",
+    "cursor",
+    "opencode",
+    "antigravity",
+    "codex",
+    "network-optimization",
+    "gaming-optimization",
+    "playwright",
+    "wsl2",
+    "ollama"
+  ],
+  "author": "Do Hoang Tuan Anh (AlexDo96)",
+  "license": "MIT",
+  "os": [
+    "win32"
+  ]
+}
