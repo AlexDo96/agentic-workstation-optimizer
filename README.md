@@ -117,9 +117,85 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup-and-rollback.ps1 -Acti
 
 ---
 
-## Real-world test results
+## Real-world test results & Evidence
 
-Measured on an Intel Core i5-8600K / 16GB RAM / RTX 3060 (12GB VRAM) workstation before and after applying the optimizations:
-- **Desktop PC (Ethernet via Wi-Fi 6 Mesh node):** Download speed increased from `~220 Mbps` to **`794.68 Mbps`**, idle gateway ping dropped to `5 ms` (Google DNS `8.8.8.8` ping dropped from `31 ms` to `26 ms`).
-- **Mobile phone (connected to dedicated 5GHz `160MHz` SSID):** Speed increased from `287 Mbps` to **`403 Mbps download / 417 Mbps upload`**, `6 ms` ping, `1 ms` jitter.
-- **System RAM & VRAM recovery (`free-ai-resources.ps1`):** Reclaimed `~800 MB – 1.5 GB` of idle background working-set RAM within 2 seconds without closing active applications.
+Tested on an **Intel Core i5-8600K / 16GB RAM / NVIDIA GeForce RTX 3060 (12GB VRAM) / Intel I219-V Gigabit Ethernet** workstation connected via an SDMC AX3000 Wi-Fi 6 Mesh node (`NR3053`) to a Viettel GPON fiber line (`NPE3036GV`):
+
+### 1. Before vs. After Summary
+
+| Metric / Parameter | Before Optimization | After Optimization |
+| :--- | :--- | :--- |
+| **Desktop PC Download / Upload (Ethernet)** | `~220 Mbps` | **`794.68 Mbps Down / 535.98 Mbps Up`** (`5 ms` ping) |
+| **Mobile Phone Wi-Fi (Galaxy Z Fold5)** | `287.83 Mbps Down / 284.83 Mbps Up` (`10 ms` ping) | **`403 Mbps Down / 417 Mbps Up`** (`6 ms` ping, `1 ms` jitter on dedicated 5GHz `160MHz` SSID) |
+| **Google DNS (`8.8.8.8`) Ping** | `31 ms` | **`26 ms`** |
+| **NIC Receive / Transmit Buffers (`I219-V`)** | `256 / 512` (EEE `On`, ITR `Adaptive`) | **`2048 / 2048`** (EEE `Off`, ITR `Off`) |
+| **Windows `NetworkThrottlingIndex`** | `10` (10 packets/ms cap) | **`4294967295` (`0xffffffff` — Uncapped)** |
+| **QA Ephemeral Ports (`MaxUserPort` / `TIME_WAIT`)** | `16,384 ports` / `120s` | **`55,535 ports (`65534`) / `30s`** |
+| **CPU Power Plan & AC State** | `Balanced` | **`Ultimate Performance` (Min/Max `100%`)** |
+| **System Physical RAM Recovery (`free-ai-resources.ps1`)** | `7,281 MB Free` | **`9,129 MB Free` (`+1,848 MB` reclaimed in 2s)** |
+
+### 2. Speedtest Screenshots
+
+#### Desktop PC (Ethernet via AX3000 Mesh Node — `794.68 Mbps Down / 535.98 Mbps Up`, `5 ms` Ping)
+![Desktop PC Speedtest After Optimization](./assets/pc-speedtest-after.png)
+
+#### Mobile Wi-Fi 6 (Before vs. After Dedicated 5GHz `160MHz` Channel Configuration)
+| Before (`287.83 Mbps Down / 284.83 Mbps Up`, `10 ms` Ping) | After (`403 Mbps Down / 417 Mbps Up`, `6 ms` Ping, `1 ms` Jitter) |
+| :---: | :---: |
+| <img src="./assets/mobile-wifi-before.jpg" width="320" alt="Mobile Wi-Fi Before" /> | <img src="./assets/mobile-wifi-after-160mhz.jpg" width="320" alt="Mobile Wi-Fi After 160MHz" /> |
+
+### 3. Actual Terminal Output Logs
+
+#### System RAM & GPU VRAM Cleanup (`scripts/free-ai-resources.ps1`)
+```text
+================================================================
+   FREEING GPU VRAM, SYSTEM RAM & LEFTOVER PROCESSES
+================================================================
+System RAM Free Before : 7281 MB
+GPU VRAM Before        : 1333 MiB, 10783 MiB, 12288 MiB
+[OK] No idle Ollama models currently occupying VRAM.
+[OK] No leftover WebDriver processes found.
+[OK] Trimmed unused background memory pages across 81 processes
+System RAM Free After  : 9129 MB (+1848 MB freed)
+GPU VRAM After         : 1300 MiB, 10816 MiB, 12288 MiB
+```
+
+#### Workstation Optimization & Diagnostic Verification (`scripts/optimize-workstation.ps1` & `scripts/diagnose-network-ai.ps1`)
+```text
+Primary Adapter Selected: Ethernet 2 (Intel(R) Ethernet Connection (7) I219-V)
+DisplayName                      DisplayValue RegistryKeyword
+-----------                      ------------ ---------------
+Energy Efficient Ethernet        Off          EEELinkAdvertisement
+Flow Control                     Rx & Tx Enabled *FlowControl
+Interrupt Moderation             Disabled     *InterruptModeration
+Interrupt Moderation Rate        Off          ITR
+Receive Buffers                  2048         *ReceiveBuffers
+Transmit Buffers                 2048         *TransmitBuffers
+Ultra Low Power Mode             Disabled     ULPMode
+
+NetworkThrottlingIndex : 4294967295 (Default=10, Unlocked=4294967295 / 0xffffffff)
+SystemResponsiveness   : 0% (Default=20%, Unlocked=0%)
+QoS NonBestEffortLimit : 0 (Unlocked=0)
+Ephemeral MaxUserPort  : 65534 (Default=N/A [16k ports], Target=65534 [55k ports])
+TcpTimedWaitDelay      : 30s (Default=120s, Target=30s)
+Win32 LongPathsEnabled : 1 (1=Enabled)
+NTFS DisableLastAccess : 1 (0=Enabled [Slower I/O], 1=Disabled [Faster I/O])
+Interface [Intel(R) Ethernet Connection (7) I219-V] -> TCPNoDelay=1 | TcpAckFrequency=1
+
+--- Cloud AI Provider TLS Handshake & Connect Latency ---
+Anthropic (Claude Code / API)    -> DNS:0.028191s | TCP:0.064109s | TLS:0.129211s
+OpenAI (Codex / Cursor / API)    -> DNS:0.004056s | TCP:0.039815s | TLS:0.089412s
+Google Gemini (Antigravity)      -> DNS:0.029252s | TCP:0.088435s | TLS:0.181140s
+OpenRouter (OpenCode / Multi)    -> DNS:0.002975s | TCP:0.039081s | TLS:0.081124s
+GitHub (Copilot / Git)           -> DNS:0.003105s | TCP:0.052140s | TLS:0.114502s
+
+Active Power Plan         : Power Scheme GUID: 3d4eaba8-aede-4736-a564-5c86b303ca8a (Ultimate Performance)
+GPU HAGS (HwSchMode)      : 2 (1=Disabled, 2=Enabled)
+DirectX Windowed Flip     : SwapEffectUpgradeEnable=1;
+Background GameDVR        : 0 (0=Disabled [Higher FPS], 1=Enabled)
+UI MenuShowDelay          : 10 ms (Default=400, Target=10)
+WSL2 Network Mode         : Enabled (Mirrored)
+OLLAMA_FLASH_ATTENTION    : 1 (Target=1)
+OLLAMA_KV_CACHE_TYPE      : q8_0 (Target=q8_0)
+NVIDIA GPU Status         : NVIDIA GeForce RTX 3060, 591.74, 49 C, 17.51 W, 1300 MiB, 12288 MiB
+```

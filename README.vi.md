@@ -117,9 +117,85 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup-and-rollback.ps1 -Acti
 
 ---
 
-## Kết quả thử nghiệm thực tế
+## Kết quả thử nghiệm thực tế & Bằng chứng (Evidence)
 
-Kết quả đo trước và sau khi áp dụng trên máy tính bàn (Intel Core i5-8600K / 16GB RAM / RTX 3060 12GB VRAM):
-- **Tốc độ mạng trên máy tính bàn (cắm dây LAN qua cục thu Mesh Wi-Fi 6):** Tăng từ `~220 Mbps` lên **`794.68 Mbps`**, ping giảm xuống `5 ms` (ping tới Google DNS `8.8.8.8` giảm từ `31 ms` xuống `26 ms`).
-- **Tốc độ mạng trên điện thoại (kết nối vào sóng Wi-Fi 5GHz `160MHz` tách riêng):** Tăng từ `287 Mbps` lên **`403 Mbps tải xuống / 417 Mbps tải lên`**, ping `6 ms`, độ trễ dao động (Jitter) `1 ms`.
-- **Thu hồi bộ nhớ (`free-ai-resources.ps1`):** Giải phóng ngay lập tức `~800 MB – 1.5 GB` RAM vật lý đang bị giữ bởi các tiến trình chạy nền chỉ trong 2 giây mà không làm ảnh hưởng đến ứng dụng đang mở.
+Đo thực tế trên máy tính bàn **Intel Core i5-8600K / 16GB RAM / NVIDIA GeForce RTX 3060 (12GB VRAM) / Card mạng Intel I219-V Gigabit** kết nối qua cục thu Mesh Wi-Fi 6 (`SDMC AX3000 NR3053`) trên đường truyền cáp quang Viettel (`NPE3036GV`):
+
+### 1. Bảng so sánh Trước và Sau khi tối ưu
+
+| Thông số / Hạng mục | Trước khi tối ưu | Sau khi tối ưu |
+| :--- | :--- | :--- |
+| **Tốc độ mạng trên PC (Cắm dây LAN)** | `~220 Mbps` | **`794.68 Mbps Tải xuống / 535.98 Mbps Tải lên`** (Ping `5 ms`) |
+| **Tốc độ Wi-Fi trên Điện thoại (Galaxy Z Fold5)** | `287.83 Mbps Down / 284.83 Mbps Up` (Ping `10 ms`) | **`403 Mbps Down / 417 Mbps Up`** (Ping `6 ms`, Jitter `1 ms` trên sóng 5GHz `160MHz` riêng) |
+| **Ping tới Google DNS (`8.8.8.8`)** | `31 ms` | **`26 ms`** |
+| **Bộ đệm nhận/truyền Card mạng (`I219-V`)** | `256 / 512` (EEE `On`, ITR `Adaptive`) | **`2048 / 2048`** (EEE `Off`, ITR `Off`) |
+| **Giới hạn gói tin Windows (`NetworkThrottlingIndex`)** | `10` (Giới hạn 10 gói/ms) | **`4294967295` (`0xffffffff` — Mở khóa hoàn toàn)** |
+| **Số cổng chạy Test (`MaxUserPort` / `TIME_WAIT`)** | `16.384 cổng` / `120s` | **`55.535 cổng (`65534`) / `30s`** |
+| **Chế độ nguồn CPU (`Power Plan`)** | `Balanced` | **`Ultimate Performance` (Min/Max `100%`)** |
+| **Thu hồi RAM vật lý (`free-ai-resources.ps1`)** | `7,281 MB Trống` | **`9,129 MB Trống` (Giải phóng ngay `+1,848 MB` RAM trong 2 giây)** |
+
+### 2. Ảnh chụp kết quả Speedtest thực tế
+
+#### Trên máy tính bàn (Cắm dây LAN qua cục Mesh AX3000 — `794.68 Mbps Down / 535.98 Mbps Up`, Ping `5 ms`)
+![Kết quả Speedtest trên PC sau khi tối ưu](./assets/pc-speedtest-after.png)
+
+#### Trên điện thoại (Trước và Sau khi tách sóng 5GHz `160MHz` riêng biệt)
+| Trước khi tách băng tần (`287.83 Mbps Down / 284.83 Mbps Up`, Ping `10 ms`) | Sau khi tách sóng 5GHz `160MHz` (`403 Mbps Down / 417 Mbps Up`, Ping `6 ms`, Jitter `1 ms`) |
+| :---: | :---: |
+| <img src="./assets/mobile-wifi-before.jpg" width="320" alt="Tốc độ Wi-Fi trên điện thoại trước khi tối ưu" /> | <img src="./assets/mobile-wifi-after-160mhz.jpg" width="320" alt="Tốc độ Wi-Fi trên điện thoại sau khi bật 160MHz" /> |
+
+### 3. Log kết quả chạy thực tế trên PowerShell
+
+#### Thu hồi RAM vật lý & Giải phóng VRAM (`scripts/free-ai-resources.ps1`)
+```text
+================================================================
+   FREEING GPU VRAM, SYSTEM RAM & LEFTOVER PROCESSES
+================================================================
+System RAM Free Before : 7281 MB
+GPU VRAM Before        : 1333 MiB, 10783 MiB, 12288 MiB
+[OK] No idle Ollama models currently occupying VRAM.
+[OK] No leftover WebDriver processes found.
+[OK] Trimmed unused background memory pages across 81 processes
+System RAM Free After  : 9129 MB (+1848 MB freed)
+GPU VRAM After         : 1300 MiB, 10816 MiB, 12288 MiB
+```
+
+#### Kiểm tra cấu hình Phần cứng, Card mạng & Độ trễ API AI (`scripts/diagnose-network-ai.ps1`)
+```text
+Primary Adapter Selected: Ethernet 2 (Intel(R) Ethernet Connection (7) I219-V)
+DisplayName                      DisplayValue RegistryKeyword
+-----------                      ------------ ---------------
+Energy Efficient Ethernet        Off          EEELinkAdvertisement
+Flow Control                     Rx & Tx Enabled *FlowControl
+Interrupt Moderation             Disabled     *InterruptModeration
+Interrupt Moderation Rate        Off          ITR
+Receive Buffers                  2048         *ReceiveBuffers
+Transmit Buffers                 2048         *TransmitBuffers
+Ultra Low Power Mode             Disabled     ULPMode
+
+NetworkThrottlingIndex : 4294967295 (Default=10, Unlocked=4294967295 / 0xffffffff)
+SystemResponsiveness   : 0% (Default=20%, Unlocked=0%)
+QoS NonBestEffortLimit : 0 (Unlocked=0)
+Ephemeral MaxUserPort  : 65534 (Default=N/A [16k ports], Target=65534 [55k ports])
+TcpTimedWaitDelay      : 30s (Default=120s, Target=30s)
+Win32 LongPathsEnabled : 1 (1=Enabled)
+NTFS DisableLastAccess : 1 (0=Enabled [Slower I/O], 1=Disabled [Faster I/O])
+Interface [Intel(R) Ethernet Connection (7) I219-V] -> TCPNoDelay=1 | TcpAckFrequency=1
+
+--- Cloud AI Provider TLS Handshake & Connect Latency ---
+Anthropic (Claude Code / API)    -> DNS:0.028191s | TCP:0.064109s | TLS:0.129211s
+OpenAI (Codex / Cursor / API)    -> DNS:0.004056s | TCP:0.039815s | TLS:0.089412s
+Google Gemini (Antigravity)      -> DNS:0.029252s | TCP:0.088435s | TLS:0.181140s
+OpenRouter (OpenCode / Multi)    -> DNS:0.002975s | TCP:0.039081s | TLS:0.081124s
+GitHub (Copilot / Git)           -> DNS:0.003105s | TCP:0.052140s | TLS:0.114502s
+
+Active Power Plan         : Power Scheme GUID: 3d4eaba8-aede-4736-a564-5c86b303ca8a (Ultimate Performance)
+GPU HAGS (HwSchMode)      : 2 (1=Disabled, 2=Enabled)
+DirectX Windowed Flip     : SwapEffectUpgradeEnable=1;
+Background GameDVR        : 0 (0=Disabled [Higher FPS], 1=Enabled)
+UI MenuShowDelay          : 10 ms (Default=400, Target=10)
+WSL2 Network Mode         : Enabled (Mirrored)
+OLLAMA_FLASH_ATTENTION    : 1 (Target=1)
+OLLAMA_KV_CACHE_TYPE      : q8_0 (Target=q8_0)
+NVIDIA GPU Status         : NVIDIA GeForce RTX 3060, 591.74, 49 C, 17.51 W, 1300 MiB, 12288 MiB
+```
