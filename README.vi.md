@@ -144,7 +144,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup-and-rollback.ps1 -Acti
 #### Trên điện thoại (Trước và Sau khi tách sóng 5GHz `160MHz` riêng biệt)
 | Trước khi tách băng tần (`287.83 Mbps Down / 284.83 Mbps Up`, Ping `10 ms`) | Sau khi tách sóng 5GHz `160MHz` (`403 Mbps Down / 417 Mbps Up`, Ping `6 ms`, Jitter `1 ms`) |
 | :---: | :---: |
-| <img src="./assets/mobile-wifi-before.jpg" width="320" alt="Tốc độ Wi-Fi trên điện thoại trước khi tối ưu" /> | <img src="./assets/mobile-wifi-after-160mhz.jpg" width="320" alt="Tốc độ Wi-Fi trên điện thoại sau khi bật 160MHz" /> |
+| <img src="./assets/mobile-wifi-before.jpg" height="420" alt="Tốc độ Wi-Fi trên điện thoại trước khi tối ưu" /> | <img src="./assets/mobile-wifi-after-160mhz.jpg" height="420" alt="Tốc độ Wi-Fi trên điện thoại sau khi bật 160MHz" /> |
 
 ### 3. Log kết quả chạy thực tế trên PowerShell
 

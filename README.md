@@ -144,7 +144,7 @@ Tested on an **Intel Core i5-8600K / 16GB RAM / NVIDIA GeForce RTX 3060 (12GB VR
 #### Mobile Wi-Fi 6 (Before vs. After Dedicated 5GHz `160MHz` Channel Configuration)
 | Before (`287.83 Mbps Down / 284.83 Mbps Up`, `10 ms` Ping) | After (`403 Mbps Down / 417 Mbps Up`, `6 ms` Ping, `1 ms` Jitter) |
 | :---: | :---: |
-| <img src="./assets/mobile-wifi-before.jpg" width="320" alt="Mobile Wi-Fi Before" /> | <img src="./assets/mobile-wifi-after-160mhz.jpg" width="320" alt="Mobile Wi-Fi After 160MHz" /> |
+| <img src="./assets/mobile-wifi-before.jpg" height="420" alt="Mobile Wi-Fi Before" /> | <img src="./assets/mobile-wifi-after-160mhz.jpg" height="420" alt="Mobile Wi-Fi After 160MHz" /> |
 
 ### 3. Actual Terminal Output Logs
 
