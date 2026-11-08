@@ -1,0 +1,15 @@
+---
+description: Universal Agentic Workstation, Network & QA Automation Optimizer - Use when the user asks to check, fix, or maximize network speed, reduce Cloud AI API latency, unlock QA Automation (Playwright/Appium/API) ports, fix WSL2/Docker VPN networking, tune router/Wi-Fi 6 settings, or accelerate Local AI (Ollama/CUDA/GPU) on Windows.
+globs:
+alwaysApply: false
+---
+
+# Universal Agentic Workstation Optimizer (`agentic-workstation-optimizer`)
+
+When asked to diagnose or optimize workstation performance, network speed, Cloud AI API streaming, QA Automation capacity, WSL2 networking, or Local AI (Ollama/GPU):
+
+1. Read and follow the step-by-step instructions in [SKILL.md](mdc:SKILL.md).
+2. Always run the read-only diagnostic script first:
+   `powershell -ExecutionPolicy Bypass -File ./scripts/diagnose-network-ai.ps1 -SaveReport`
+3. Default to **Enterprise-Safe Mode** on company workstations (automatically snapshots state via `backup-and-rollback.ps1`, unlocks Windows `NetworkThrottlingIndex`, NIC `Receive/Transmit Buffers = 2048`, disables `EEE`/`ULP`, enables `TCPNoDelay = 1`, sets `NODE_OPTIONS=--dns-result-order=ipv4first`, unlocks 55k Ephemeral Ports, enables WSL2 Mirrored mode, GPU `HAGS`, and `OLLAMA_FLASH_ATTENTION=1` + `q8_0` without altering corporate DNS/VPN/Firewall settings).
+4. Execute `powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1` (or provide the elevated PowerShell Admin command block if non-elevated) and verify the before/after benchmark results.

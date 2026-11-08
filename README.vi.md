@@ -1,12 +1,12 @@
 <div align="center">
 
-# 🚀 Bộ Tối Ưu Hóa Mạng, QA Automation & Máy Trạm AI Toàn Diện v2.0 (`network-ai-optimizer`)
+# 🚀 Bộ Tối Ưu Hóa Máy Trạm AI, Mạng & QA Automation Toàn Diện v2.0 (`agentic-workstation-optimizer`)
 
 **Bộ Kỹ Năng (Skill) AI Đa Nền Tảng, Subagent (`@network-doctor`) & Script Tự Động Hóa PowerShell dành cho Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf và GitHub Copilot.**
 
 [![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](./README.md)
 [![Tiếng Việt](https://img.shields.io/badge/Ngôn_ngữ-Tiếng_Việt-red?style=for-the-badge)](./README.vi.md)
-[![Version](https://img.shields.io/badge/Phiên_bản-v2.0-success?style=for-the-badge)](https://github.com/AlexDo96/network-ai-optimizer)
+[![Version](https://img.shields.io/badge/Phiên_bản-v2.0-success?style=for-the-badge)](https://github.com/AlexDo96/agentic-workstation-optimizer)
 
 [🌐 **Read in English**](./README.md) | [🇻🇳 **Đọc bản Tiếng Việt**](./README.vi.md)
 
@@ -14,7 +14,7 @@
 
 ---
 
-**`network-ai-optimizer` v2.0** là bộ vũ khí kỹ thuật hệ thống toàn diện được thiết kế chuyên biệt cho **Kỹ sư AI (AI Engineers), Kỹ sư Kiểm thử Tự động (QA Automation / SDET với Playwright, Appium, API Testing) và Power Users**.
+**`agentic-workstation-optimizer` v2.0** là bộ vũ khí kỹ thuật hệ thống toàn diện được thiết kế chuyên biệt cho **Kỹ sư AI (AI Engineers), Kỹ sư Kiểm thử Tự động (QA Automation / SDET với Playwright, Appium, API Testing) và Power Users**.
 
 Bộ công cụ giúp mở khóa 100% giới hạn băng thông của Windows & phần cứng Card mạng (tăng tốc độ từ mức bị bóp ~200 Mbps lên thẳng **700–1000 Mbps**), loại bỏ triệt để **độ trễ Proxy công ty / lỗi IPv6 Happy-Eyeballs / nghẽn gói tin MTU khi bật VPN** đối với các Cloud AI API (`Anthropic Claude`, `OpenAI`, `Gemini`, `OpenRouter`), mở rộng dải cổng động lên **55.535 cổng Ephemeral Ports** cho chạy test E2E song song, bật **Mạng Phản Chiếu WSL2 (`Mirrored Networking`)** giúp Linux/Docker không bao giờ mất mạng khi bật VPN công ty, và tăng tốc chạy Local LLM (`Ollama`, `CUDA`, `HAGS`) — đi kèm cơ chế **Sao Lưu Time-Machine & Khôi Phục Nguyên Trạng 1-Chạm (`Rollback`)**.
 
@@ -26,22 +26,22 @@ Repository này tích hợp sẵn các file nhận diện tự nhiên cho mọi 
 
 | AI Agent / IDE | File Nhận Diện Trong Repo | Đường Dẫn Cài Đặt Toàn Cục (qua `install.ps1`) | Cách Kích Hoạt |
 | :--- | :--- | :--- | :--- |
-| **Google Antigravity** | `SKILL.md` / `.agents/agents/network-doctor.md` | `~/.gemini/config/skills/` & `agents/` | Nhắn dùng skill `network-ai-optimizer` hoặc `network-doctor` |
-| **Claude Code CLI** | `CLAUDE.md` / `.claude/commands/` & `agents/` | `~/.claude/skills/`, `commands/`, `agents/` | Gõ `/network-ai-optimizer` hoặc gọi `@network-doctor` |
-| **OpenCode CLI** | `AGENTS.md` / `SKILL.md` | `~/.config/opencode/skills/`, `commands/`, `agents/` | Gõ `/network-ai-optimizer` hoặc gọi `network-doctor` |
-| **OpenAI Codex CLI** | `AGENTS.md` / `SKILL.md` | `~/.codex/skills/network-ai-optimizer/` | Nhắn Codex chạy `network-ai-optimizer` |
-| **Cursor IDE** | `.cursor/rules/network-ai-optimizer.mdc` | `.cursor/rules/network-ai-optimizer.mdc` | Gõ `@network-ai-optimizer` hoặc nhắn Agent |
+| **Google Antigravity** | `SKILL.md` / `.agents/agents/network-doctor.md` | `~/.gemini/config/skills/` & `agents/` | Nhắn dùng skill `agentic-workstation-optimizer` hoặc `network-doctor` |
+| **Claude Code CLI** | `CLAUDE.md` / `.claude/commands/` & `agents/` | `~/.claude/skills/`, `commands/`, `agents/` | Gõ `/agentic-workstation-optimizer` hoặc gọi `@network-doctor` |
+| **OpenCode CLI** | `AGENTS.md` / `SKILL.md` | `~/.config/opencode/skills/`, `commands/`, `agents/` | Gõ `/agentic-workstation-optimizer` hoặc gọi `network-doctor` |
+| **OpenAI Codex CLI** | `AGENTS.md` / `SKILL.md` | `~/.codex/skills/agentic-workstation-optimizer/` | Nhắn Codex chạy `agentic-workstation-optimizer` |
+| **Cursor IDE** | `.cursor/rules/agentic-workstation-optimizer.mdc` | `.cursor/rules/agentic-workstation-optimizer.mdc` | Gõ `@agentic-workstation-optimizer` hoặc nhắn Agent |
 | **Windsurf / Copilot** | `AGENTS.md` | Workspace `AGENTS.md` | Nhắn trong Cascade / Copilot Chat |
 
 ---
 
 ## 📦 Cài Đặt Tự Động Chỉ Với 1 Lệnh
 
-Clone repository về máy và chạy **`install.ps1`** để tự động đăng ký **Skill**, **Slash Command (`/network-ai-optimizer`)**, **Subagent (`network-doctor`)**, và **Cursor Rule** trên toàn hệ thống:
+Clone repository về máy và chạy **`install.ps1`** để tự động đăng ký **Skill**, **Slash Command (`/agentic-workstation-optimizer`)**, **Subagent (`network-doctor`)**, và **Cursor Rule** trên toàn hệ thống:
 
 ```powershell
-git clone https://github.com/AlexDo96/network-ai-optimizer.git
-cd network-ai-optimizer
+git clone https://github.com/AlexDo96/agentic-workstation-optimizer.git
+cd agentic-workstation-optimizer
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
@@ -99,4 +99,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup-and-rollback.ps1 -Acti
 
 ## 📊 Kết Quả Thực Tế Sau Khi Tối Ưu (Benchmark)
 - **Tốc độ trên PC (LAN / Mesh Backhaul):** Từ `220 Mbps` ➔ Vọt lên **`794.68 Mbps`** (`Ping 5ms`, Google DNS `26ms`)
-- **Tốc độ trên Điện thoại (Wi-Fi 6 `160MHz` sóng 5G riêng):** Từ `287 Mbps` ➔ Vọt lên **`403 Mbps Download / 417 Mbps Upload`** (`Ping 6ms`, `Jitter 1ms`)
+- **Tốc độ trên Điện thoại (Wi-Fi 6 `160MHz` sóng 5G riêng):** Từ `287 Mbps` ➔ Vọt lên **`403 Mbps Download / 417 Mbps Up`** (`Ping 6ms`, `Jitter 1ms`)

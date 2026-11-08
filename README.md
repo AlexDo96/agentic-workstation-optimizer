@@ -1,12 +1,12 @@
 <div align="center">
 
-# 🚀 Universal Network, QA Automation & AI Workstation Optimizer v2.0 (`network-ai-optimizer`)
+# 🚀 Universal Agentic Workstation, Network & QA Automation Optimizer v2.0 (`agentic-workstation-optimizer`)
 
 **A Universal AI Agent Skill, Subagent (`@network-doctor`), and PowerShell Automation Suite for Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf, and GitHub Copilot.**
 
 [![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](./README.md)
 [![Tiếng Việt](https://img.shields.io/badge/Ngôn_ngữ-Tiếng_Việt-red?style=for-the-badge)](./README.vi.md)
-[![Version](https://img.shields.io/badge/Release-v2.0-success?style=for-the-badge)](https://github.com/AlexDo96/network-ai-optimizer)
+[![Version](https://img.shields.io/badge/Release-v2.0-success?style=for-the-badge)](https://github.com/AlexDo96/agentic-workstation-optimizer)
 
 [🌐 **Read in English**](./README.md) | [🇻🇳 **Đọc bản Tiếng Việt**](./README.vi.md)
 
@@ -14,7 +14,7 @@
 
 ---
 
-**`network-ai-optimizer` v2.0** is an all-in-one systems engineering toolkit designed for **AI Engineers, QA Automation Architects (Playwright / Appium / API Testing), and Power Users**.
+**`agentic-workstation-optimizer` v2.0** is an all-in-one systems engineering toolkit designed for **AI Engineers, QA Automation Architects (Playwright / Appium / API Testing), and Power Users**.
 
 It unlocks Windows OS & NIC hardware throughput limits (boosting typical throttled speeds from ~200 Mbps to **700–1000 Mbps**), eliminates **Corporate Proxy / IPv6 Happy-Eyeballs / VPN MTU lag** when streaming from Cloud AI APIs (`Anthropic`, `OpenAI`, `Gemini`, `OpenRouter`), expands Windows Ephemeral Ports to **55,535 ports** for massive parallel E2E test execution, enables **WSL2 Mirrored Networking** (so Linux/Docker never loses internet when corporate VPNs turn on), and accelerates Local LLM inference (`Ollama`, `CUDA`, `HAGS`) — backed by an automatic **Time-Machine Backup & 1-Click Rollback**.
 
@@ -26,28 +26,28 @@ This repository includes native discovery files for all major AI coding assistan
 
 | AI Agent / IDE | Native Repo File | Global Install Path (via `install.ps1`) | How to Trigger |
 | :--- | :--- | :--- | :--- |
-| **Google Antigravity** | `SKILL.md` / `.agents/agents/network-doctor.md` | `~/.gemini/config/skills/` & `agents/` | Ask to use `network-ai-optimizer` or `network-doctor` |
-| **Claude Code CLI** | `CLAUDE.md` / `.claude/commands/` & `agents/` | `~/.claude/skills/`, `commands/`, `agents/` | Type `/network-ai-optimizer` or delegate to `@network-doctor` |
-| **OpenCode CLI** | `AGENTS.md` / `SKILL.md` | `~/.config/opencode/skills/`, `commands/`, `agents/` | Type `/network-ai-optimizer` or call `network-doctor` |
-| **OpenAI Codex CLI** | `AGENTS.md` / `SKILL.md` | `~/.codex/skills/network-ai-optimizer/` | Ask Codex to run `network-ai-optimizer` |
-| **Cursor IDE** | `.cursor/rules/network-ai-optimizer.mdc` | `.cursor/rules/network-ai-optimizer.mdc` | `@network-ai-optimizer` or ask Agent |
+| **Google Antigravity** | `SKILL.md` / `.agents/agents/network-doctor.md` | `~/.gemini/config/skills/` & `agents/` | Ask to use `agentic-workstation-optimizer` or `network-doctor` |
+| **Claude Code CLI** | `CLAUDE.md` / `.claude/commands/` & `agents/` | `~/.claude/skills/`, `commands/`, `agents/` | Type `/agentic-workstation-optimizer` or delegate to `@network-doctor` |
+| **OpenCode CLI** | `AGENTS.md` / `SKILL.md` | `~/.config/opencode/skills/`, `commands/`, `agents/` | Type `/agentic-workstation-optimizer` or call `network-doctor` |
+| **OpenAI Codex CLI** | `AGENTS.md` / `SKILL.md` | `~/.codex/skills/agentic-workstation-optimizer/` | Ask Codex to run `agentic-workstation-optimizer` |
+| **Cursor IDE** | `.cursor/rules/agentic-workstation-optimizer.mdc` | `.cursor/rules/agentic-workstation-optimizer.mdc` | `@agentic-workstation-optimizer` or ask Agent |
 | **Windsurf / Copilot** | `AGENTS.md` | Workspace `AGENTS.md` | Ask in Cascade / Copilot Chat |
 
 ---
 
 ## 📦 1-Command Universal Installation
 
-Clone the repository and run **`install.ps1`** to automatically register the **Skill**, **Slash Command (`/network-ai-optimizer`)**, **Subagent (`network-doctor`)**, and **Cursor Rule** across your machine:
+Clone the repository and run **`install.ps1`** to automatically register the **Skill**, **Slash Command (`/agentic-workstation-optimizer`)**, **Subagent (`network-doctor`)**, and **Cursor Rule** across your machine:
 
 ```powershell
-git clone https://github.com/AlexDo96/network-ai-optimizer.git
-cd network-ai-optimizer
+git clone https://github.com/AlexDo96/agentic-workstation-optimizer.git
+cd agentic-workstation-optimizer
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 ---
 
-## 🔥 What's New in v2.0 (6 Breakthrough Modules)
+## 🔥 6 Core Modules in v2.0
 
 ### 1. 🏢 Corporate Network & Cloud AI Piercer (Enterprise-Safe)
 - **Eliminates IPv6 "Happy Eyeballs" 300–1500ms API Delay:** Automatically configures `NODE_OPTIONS="--dns-result-order=ipv4first"` so Node.js-based tools (Claude Code, OpenCode, Playwright, MCP servers) never hang on broken corporate IPv6 routes before falling back to IPv4.

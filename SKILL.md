@@ -1,5 +1,5 @@
 ---
-name: network-ai-optimizer
+name: agentic-workstation-optimizer
 description: >-
   Universal AI Agent Skill v2.0 (Antigravity, Claude Code, OpenCode, Cursor, Codex,
   Windsurf, Copilot) to diagnose, unlock, and optimize Windows network throughput
@@ -10,7 +10,7 @@ description: >-
   Includes Time-Machine Backup & 1-Click Rollback.
 ---
 
-# Universal Network, QA Automation & AI Workstation Optimizer v2.0 (`network-ai-optimizer`)
+# Universal Agentic Workstation, Network & QA Automation Optimizer v2.0 (`agentic-workstation-optimizer`)
 
 This skill provides a comprehensive, enterprise-safe workflow for **any AI Coding Agent** to unlock hardware/OS bandwidth limits on Windows workstations, eliminate Cloud AI API latency, supercharge parallel E2E/API test execution, optimize WSL2/Docker networking, and accelerate Local LLM inference — complete with automatic **Time-Machine Backup & 1-Click Rollback**.
 
