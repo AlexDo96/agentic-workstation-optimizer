@@ -1,73 +1,72 @@
 ---
 name: agentic-workstation-optimizer
 description: >-
-  Universal AI Agent Skill v2.0 (Antigravity, Claude Code, OpenCode, Cursor, Codex,
-  Windsurf, Copilot) to diagnose, unlock, and optimize Windows network throughput
-  (NIC buffers, EEE/ULP, TCP stack), eliminate Corporate Proxy/IPv6/MTU lag for
-  Cloud AI APIs (Anthropic, OpenAI, Gemini, OpenRouter), unlock 55k Ephemeral Ports
-  for QA Automation (Playwright/Appium/API Testing), tune WSL2/Docker Mirrored
-  Networking, and accelerate Local AI (GPU HAGS, Ollama Flash Attention & KV Cache).
-  Includes Time-Machine Backup & 1-Click Rollback.
+  Diagnose and optimize Windows network throughput (NIC buffers, EEE/ULP power
+  saving, TCP stack), fix corporate network/VPN latency and SSL issues for Cloud AI
+  APIs (Anthropic, OpenAI, Gemini, OpenRouter), expand ephemeral ports for automated
+  testing (Playwright, Appium, API tests), configure WSL2 Mirrored Networking, and
+  tune Local AI settings (GPU HAGS, Ollama Flash Attention & KV Cache) with automatic
+  backup and rollback.
 ---
 
-# Universal Agentic Workstation, Network & QA Automation Optimizer v2.0 (`agentic-workstation-optimizer`)
+# Agentic Workstation Optimizer (`agentic-workstation-optimizer`)
 
-This skill provides a comprehensive, enterprise-safe workflow for **any AI Coding Agent** to unlock hardware/OS bandwidth limits on Windows workstations, eliminate Cloud AI API latency, supercharge parallel E2E/API test execution, optimize WSL2/Docker networking, and accelerate Local LLM inference — complete with automatic **Time-Machine Backup & 1-Click Rollback**.
+This skill provides a practical workflow to diagnose and fix Windows network throttling, corporate network delays when calling Cloud AI APIs, port exhaustion during parallel E2E/API test runs, WSL2 VPN connectivity issues, and local LLM memory usage. All changes are backed up automatically before being applied so they can be reverted at any time.
 
 ---
 
-## 1. Operating Modes (Determine Context First)
+## 1. Operating Modes (Check Context First)
 
-1. **Enterprise / Office Mode (Default for Company Workstations - No Gaming):**
+1. **Office / Company PC Mode (Default):**
    - **Safety Rules:**
-     - **DO NOT** modify corporate router/firewall settings without explicit authorization.
-     - **DO NOT** alter corporate DNS servers, Active Directory policies, or corporate VPN connections.
-   - **Focus:** Unlocking local Windows OS packet throttling (`NetworkThrottlingIndex`), NIC hardware buffers (`2048`), Corporate AI Proxy Piercer (`ipv4first` + Windows `schannel` SSL), 55,000 Ephemeral Ports for QA Automation & MCP, WSL2 Mirrored Networking, and GPU HAGS / Ollama tuning.
-2. **Home / Personal Mode (Full Max):**
-   - Includes all workstation optimizations above, plus optional router/ONT inspection and tuning (`192.168.1.1`): 5GHz `160MHz` channel width, dedicated Pure-`5G` SSID creation, disabling `NAT Session Limit`, and `UPnP` / Static DHCP.
+     - Do not modify company router or firewall settings unless explicitly requested and authorized.
+     - Do not change corporate DNS servers, Active Directory settings, or VPN profiles.
+   - **Scope:** Tune local Windows network throttling (`NetworkThrottlingIndex`), NIC hardware buffers (`2048`), Node.js IPv4 priority (`--dns-result-order=ipv4first`), Windows Certificate Store integration (`NODE_USE_SYSTEM_CA=1`, `git http.sslBackend=schannel`), ephemeral port range (`55,535` ports for Playwright/Appium/API tests), WSL2 Mirrored Networking, and GPU HAGS / Ollama settings.
+2. **Home PC Mode:**
+   - Includes all workstation optimizations above, plus optional local router tuning (`192.168.1.1`) if requested: 5GHz `160MHz` channel width, dedicated 5GHz SSID setup, disabling `NAT Session Limit`, and enabling `UPnP` / Static DHCP.
 
 ---
 
-## 2. Automation Scripts Toolkit (`./scripts/`)
+## 2. Included Scripts (`./scripts/`)
 
 | Script | Purpose |
 | :--- | :--- |
-| [diagnose-network-ai.ps1](./scripts/diagnose-network-ai.ps1) | Read-only audit: NIC buffers, OS stack, QA ports, Corporate IPv6/MTU Blackhole probe, Cloud AI API TLS latency, CDN speed, GPU/Ollama status, and `-SaveReport` Markdown Scorecard generator. |
-| [optimize-workstation.ps1](./scripts/optimize-workstation.ps1) | Master optimizer: Automatically calls `backup-and-rollback.ps1` first, then unlocks User + Admin network, Corporate AI, QA Turbo, WSL2, and GPU/Ollama settings. |
-| [backup-and-rollback.ps1](./scripts/backup-and-rollback.ps1) | **Time-Machine Safety Net:** Saves original system state to `backups/latest-snapshot.json` (`-Action Backup`) and restores 100% original state in 3 seconds (`-Action Rollback`). |
-| [optimize-wsl2.ps1](./scripts/optimize-wsl2.ps1) | Configures `~/.wslconfig` with `networkingMode=mirrored`, `dnsTunneling=true`, `autoProxy=true`, and `autoMemoryReclaim=gradual` so WSL2/Docker never loses network on corporate VPNs. |
-| [free-ai-resources.ps1](./scripts/free-ai-resources.ps1) | 1-click cleanup: Unloads idle Ollama models from GPU VRAM (`ollama stop`) and terminates orphaned WebDriver processes (`chromedriver`, `geckodriver`, `msedgedriver`). |
+| [diagnose-network-ai.ps1](./scripts/diagnose-network-ai.ps1) | Read-only check: NIC buffers, Windows TCP stack, ephemeral ports, IPv6 vs IPv4 routing, non-fragmented MTU size, Cloud AI API latency, CDN download speed, GPU/Ollama settings, and `-SaveReport` summary generator. |
+| [optimize-workstation.ps1](./scripts/optimize-workstation.ps1) | Main optimization script: Automatically runs `backup-and-rollback.ps1` first, then applies user-level and admin-level network, testing, WSL2, and AI settings. |
+| [backup-and-rollback.ps1](./scripts/backup-and-rollback.ps1) | Saves current system settings to `backups/latest-snapshot.json` (`-Action Backup`) and restores original settings (`-Action Rollback`). |
+| [optimize-wsl2.ps1](./scripts/optimize-wsl2.ps1) | Updates `~/.wslconfig` with `networkingMode=mirrored`, `dnsTunneling=true`, `autoProxy=true`, and `autoMemoryReclaim=gradual` so WSL2/Docker keeps network access on corporate VPNs and releases unused RAM. |
+| [free-ai-resources.ps1](./scripts/free-ai-resources.ps1) | Stops idle Ollama models sitting in GPU VRAM (`ollama stop`) and closes leftover WebDriver processes (`chromedriver`, `geckodriver`, `msedgedriver`). |
 
 ---
 
-## 3. Step-by-Step Execution Workflow
+## 3. Execution Steps
 
-### Step 1: Run Diagnostics & Generate Baseline Scorecard
+### Step 1: Run Diagnostics
 ```powershell
 powershell -ExecutionPolicy Bypass -File "<path-to-skill>/scripts/diagnose-network-ai.ps1" -SaveReport
 ```
-Inspect the output for:
-- Low NIC buffers (`256`/`512` vs `2048`) or active NIC sleep states (`EEE`, `ULP`, `ITR`).
-- Default OS throttling (`NetworkThrottlingIndex = 10`).
-- **IPv6 Happy-Eyeballs delay** (broken IPv6 routing delaying Node.js / Claude Code / Playwright by 300–1500ms) or **VPN MTU Blackholes** (`Effective Non-Fragmented MTU < 1500`).
-- **QA Port Exhaustion** (`MaxUserPort` unset / default 16k ports).
+Review the output for:
+- Small NIC buffers (`256`/`512` instead of `2048`) or enabled adapter power-saving modes (`EEE`, `ULP`, `ITR`).
+- Default Windows packet throttling (`NetworkThrottlingIndex = 10`).
+- Broken IPv6 routing (causing Node.js / Claude Code / Playwright to wait on IPv6 timeouts before using IPv4) or reduced MTU size over VPN (`Effective Non-Fragmented MTU < 1500`).
+- Default ephemeral port limits (`MaxUserPort` unset).
 
-### Step 2: Apply Master Workstation Optimization (Auto-Backs Up First)
+### Step 2: Apply Optimizations (Automatically Backs Up First)
 ```powershell
 powershell -ExecutionPolicy Bypass -File "<path-to-skill>/scripts/optimize-workstation.ps1"
 ```
-*(If the current terminal is not elevated as Administrator, run the script once for User-scope optimizations and provide the elevated PowerShell Admin command to unlock HKLM Registry & NIC Hardware properties).*
+*(If the current terminal is not running as Administrator, the script applies all user-level settings and prints instructions to run in an elevated PowerShell window for registry and network adapter changes).*
 
-### Step 3: Verify & Generate Post-Optimization Scorecard
+### Step 3: Verify Results
 ```powershell
 powershell -ExecutionPolicy Bypass -File "<path-to-skill>/scripts/diagnose-network-ai.ps1" -SaveReport
 ```
-Present the **Before vs. After** comparison table to the user.
+Compare the before and after values for the user.
 
-### Step 4: Instant Rollback (If Ever Needed on a Company PC)
+### Step 4: Revert Changes (If Needed)
 ```powershell
 powershell -ExecutionPolicy Bypass -File "<path-to-skill>/scripts/backup-and-rollback.ps1" -Action Rollback
 ```
 
-### Step 5: Router / Gateway Wi-Fi 6 (`160MHz`) Optimization (Optional / With Permission)
+### Step 5: Router / Wi-Fi 6 Configuration (Optional, Home Networks Only)
 See [references/router-optimization.md](./references/router-optimization.md).

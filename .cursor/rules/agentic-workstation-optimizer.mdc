@@ -1,15 +1,14 @@
 ---
-description: Universal Agentic Workstation, Network & QA Automation Optimizer - Use when the user asks to check, fix, or maximize network speed, reduce Cloud AI API latency, unlock QA Automation (Playwright/Appium/API) ports, fix WSL2/Docker VPN networking, tune router/Wi-Fi 6 settings, or accelerate Local AI (Ollama/CUDA/GPU) on Windows.
+description: Agentic Workstation Optimizer - Use when asked to check or fix Windows network speed, Cloud AI API latency, ephemeral port limits for Playwright/Appium/API tests, WSL2 VPN connectivity, router Wi-Fi 6 settings, or local AI (Ollama/GPU) settings.
 globs:
 alwaysApply: false
 ---
 
-# Universal Agentic Workstation Optimizer (`agentic-workstation-optimizer`)
+# Agentic Workstation Optimizer (`agentic-workstation-optimizer`)
 
-When asked to diagnose or optimize workstation performance, network speed, Cloud AI API streaming, QA Automation capacity, WSL2 networking, or Local AI (Ollama/GPU):
+When asked to diagnose or optimize workstation performance, network speed, Cloud AI API connectivity, automated testing port limits, WSL2 networking, or local AI (Ollama/GPU):
 
-1. Read and follow the step-by-step instructions in [SKILL.md](mdc:SKILL.md).
-2. Always run the read-only diagnostic script first:
+1. Follow the steps in [SKILL.md](mdc:SKILL.md).
+2. Run the read-only diagnostic script first:
    `powershell -ExecutionPolicy Bypass -File ./scripts/diagnose-network-ai.ps1 -SaveReport`
-3. Default to **Enterprise-Safe Mode** on company workstations (automatically snapshots state via `backup-and-rollback.ps1`, unlocks Windows `NetworkThrottlingIndex`, NIC `Receive/Transmit Buffers = 2048`, disables `EEE`/`ULP`, enables `TCPNoDelay = 1`, sets `NODE_OPTIONS=--dns-result-order=ipv4first`, unlocks 55k Ephemeral Ports, enables WSL2 Mirrored mode, GPU `HAGS`, and `OLLAMA_FLASH_ATTENTION=1` + `q8_0` without altering corporate DNS/VPN/Firewall settings).
-4. Execute `powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1` (or provide the elevated PowerShell Admin command block if non-elevated) and verify the before/after benchmark results.
+3. On company workstations, do not change corporate DNS, VPN, or router settings. Run `./scripts/optimize-workstation.ps1` to automatically back up current settings and apply local Windows, NIC, Node.js/Git, WSL2, and GPU/Ollama optimizations.

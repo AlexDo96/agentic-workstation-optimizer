@@ -15,13 +15,13 @@ param(
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-# 0. Automatic Time-Machine Backup Before Any Modification
+# 0. Automatic Backup Before Any Modification
 if (-not $SkipBackup -and (Test-Path "$ScriptDir\backup-and-rollback.ps1")) {
     & "$ScriptDir\backup-and-rollback.ps1" -Action Backup
 }
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
-Write-Host "   STEP 1: USER-SCOPE AI, CORPORATE PROXY PIERCER & TOOLING" -ForegroundColor Cyan
+Write-Host "   STEP 1: USER-LEVEL AI, NETWORK & TOOLING SETTINGS" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
 # 1. Activate High Performance Power Plan
@@ -90,7 +90,7 @@ if (-not $isAdmin) {
 }
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
-Write-Host "   STEP 2: ADMIN-LEVEL OS NETWORK, QA TURBO & HARDWARE UNLOCK" -ForegroundColor Cyan
+Write-Host "   STEP 2: ADMIN-LEVEL OS NETWORK, EPHEMERAL PORTS & NIC SETTINGS" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
 # 1. Unlock Windows Multimedia Network Throttling & Foreground Responsiveness
@@ -171,6 +171,6 @@ if ($AdapterName) {
 }
 
 Write-Host "`n================================================================" -ForegroundColor Green
-Write-Host "   v2.0 WORKSTATION NETWORK, QA TURBO & AI OPTIMIZATIONS APPLIED!" -ForegroundColor Green
-Write-Host "   To rollback at any time: .\scripts\backup-and-rollback.ps1 -Action Rollback" -ForegroundColor Cyan
+Write-Host "   ALL WORKSTATION NETWORK, TESTING & AI SETTINGS APPLIED!" -ForegroundColor Green
+Write-Host "   To revert at any time: .\scripts\backup-and-rollback.ps1 -Action Rollback" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Green

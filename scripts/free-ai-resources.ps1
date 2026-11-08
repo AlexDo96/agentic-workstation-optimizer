@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    1-Click Zombie Process & VRAM Cleaner for AI Engineers & QA Automation.
-    - Unloads idle/stuck Ollama models from GPU VRAM (`ollama ps` -> `ollama stop`).
-    - Terminates orphaned automation drivers (`chromedriver`, `geckodriver`, `msedgedriver`, stuck headless browsers).
-    - Reports freed RAM and GPU VRAM (`nvidia-smi`).
+    Frees GPU VRAM and closes leftover automation WebDriver processes.
+    - Unloads idle Ollama models from GPU memory (`ollama ps` -> `ollama stop`).
+    - Closes leftover WebDriver processes (`chromedriver`, `geckodriver`, `msedgedriver`).
+    - Prints GPU VRAM usage before and after (`nvidia-smi`).
 #>
 
 param(
@@ -11,7 +11,7 @@ param(
 )
 
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "   AI & QA AUTOMATION RESOURCE CLEANER (VRAM & ZOMBIE PROCESSES)" -ForegroundColor Cyan
+Write-Host "   FREEING GPU VRAM & CLOSING LEFTOVER WEBDRIVER PROCESSES" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
 # 1. Check GPU VRAM Before

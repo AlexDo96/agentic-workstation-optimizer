@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Time-Machine Backup & 1-Click Rollback for `network-ai-optimizer`.
-    Captures a complete JSON snapshot of Windows Registry network keys, NIC hardware properties,
+    System Settings Backup & Rollback for `agentic-workstation-optimizer`.
+    Saves a JSON snapshot of current Windows Registry network keys, NIC hardware properties,
     User environment variables, Git global settings, and TCP dynamic port ranges before optimization.
-    Restores 100% original workstation state when called with `-Action Rollback`.
+    Restores original workstation settings when called with `-Action Rollback`.
 #>
 
 param(
@@ -30,7 +30,7 @@ if ($Action -eq "ShowLatest") {
 
 if ($Action -eq "Backup") {
     Write-Host "================================================================" -ForegroundColor Cyan
-    Write-Host "   TIME-MACHINE BACKUP: CAPTURING ORIGINAL SYSTEM STATE" -ForegroundColor Cyan
+    Write-Host "   BACKUP: SAVING CURRENT SYSTEM SETTINGS" -ForegroundColor Cyan
     Write-Host "================================================================" -ForegroundColor Cyan
 
     $primaryAdapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notmatch 'Virtual|VPN|WARP|Loopback|Bluetooth|Wireless Adapter for' } | Select-Object -First 1
@@ -115,7 +115,7 @@ if ($Action -eq "Rollback") {
     }
 
     Write-Host "================================================================" -ForegroundColor Yellow
-    Write-Host "   TIME-MACHINE ROLLBACK: RESTORING ORIGINAL SYSTEM STATE" -ForegroundColor Yellow
+    Write-Host "   ROLLBACK: RESTORING ORIGINAL SYSTEM SETTINGS" -ForegroundColor Yellow
     Write-Host "   Source: $targetFile" -ForegroundColor Yellow
     Write-Host "================================================================" -ForegroundColor Yellow
 

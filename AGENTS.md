@@ -1,23 +1,25 @@
-# Universal Agent Instructions (`agentic-workstation-optimizer`)
+# Agent Instructions (`agentic-workstation-optimizer`)
 
-This repository contains the **Universal Agentic Workstation, Network & QA Automation Optimizer v2.0 (`agentic-workstation-optimizer`)** skill, subagent (`network-doctor`), and automation scripts, compatible with **Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf, and GitHub Copilot**.
+This repository contains the `agentic-workstation-optimizer` skill, the `network-doctor` subagent, and PowerShell scripts for diagnosing and optimizing Windows network performance, corporate AI API connectivity, automated testing port limits, WSL2 networking, and local LLM settings.
 
-## Quick Activation Runbook for All AI Agents
+## Workflow for AI Assistants
 
-1. **Primary Skill Specification:** Read [SKILL.md](./SKILL.md) for the complete diagnostic and optimization workflow.
-2. **Diagnostic Step (Always Run First):**
+1. **Read the Full Guide:** See [SKILL.md](./SKILL.md) for details on each setting.
+2. **Run Diagnostics First (Read-Only):**
    ```powershell
    powershell -ExecutionPolicy Bypass -File ./scripts/diagnose-network-ai.ps1 -SaveReport
    ```
-3. **Optimization Step (Enterprise-Safe by Default, Auto-Backs Up First):**
+3. **Apply Optimizations (Automatically backs up original settings first):**
    ```powershell
    powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1
    ```
-4. **1-Click Rollback (If Requested):**
+4. **Revert to Original Settings (If requested):**
    ```powershell
    powershell -ExecutionPolicy Bypass -File ./scripts/backup-and-rollback.ps1 -Action Rollback
    ```
-5. **Router / Gateway Reference (Optional / With Permission):**
-   Read [references/router-optimization.md](./references/router-optimization.md) when inspecting or tuning local ONT/Mesh routers (`160MHz` 5GHz bandwidth, dedicated `5G` SSID split, disabling `NAT Session Limit`).
-6. **Cross-Agent Installation:**
-   Run `powershell -ExecutionPolicy Bypass -File ./install.ps1` to install this skill and subagent globally across Antigravity, Claude Code, OpenCode, Codex, and Cursor on the current machine.
+5. **Free GPU VRAM & Close Leftover Test Drivers:**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File ./scripts/free-ai-resources.ps1
+   ```
+6. **Router Configuration Guide (Optional, Home Networks Only):**
+   See [references/router-optimization.md](./references/router-optimization.md).
