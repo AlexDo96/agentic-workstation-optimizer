@@ -47,9 +47,7 @@ Write-Host "[OK] Active Power Plan: $(powercfg /getactivescheme) (AC CPU Min/Max
 if ($Mode -in @("All", "Work")) {
     [Environment]::SetEnvironmentVariable('OLLAMA_FLASH_ATTENTION', '1', 'User')
     [Environment]::SetEnvironmentVariable('OLLAMA_KV_CACHE_TYPE', 'q8_0', 'User')
-    if (-not [Environment]::GetEnvironmentVariable('OLLAMA_NUM_PARALLEL', 'User')) {
-        [Environment]::SetEnvironmentVariable('OLLAMA_NUM_PARALLEL', '2', 'User')
-    }
+    [Environment]::SetEnvironmentVariable('OLLAMA_NUM_PARALLEL', '2', 'User')
     Write-Host "[OK] Set OLLAMA_FLASH_ATTENTION=1, OLLAMA_KV_CACHE_TYPE=q8_0, OLLAMA_NUM_PARALLEL=2" -ForegroundColor Green
 
     # 3. Corporate Network & Cloud AI Compatibility (Node.js IPv4 Priority & Windows Certificate Store)
@@ -83,15 +81,19 @@ if ($Mode -in @("All", "Work")) {
 
 # 6. Windows Software, UI Snappiness, DirectX Flip Model & Background App Cleanup
 Set-ItemProperty -Path 'HKCU:\Control Panel\Desktop' -Name 'MenuShowDelay' -Value '10' -Force -ErrorAction SilentlyContinue
-New-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' -Force | Out-Null
-Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' -Name 'GlobalUserDisabled' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+$bgRegPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications'
+if (-not (Test-Path $bgRegPath)) { New-Item -Path $bgRegPath -Force | Out-Null }
+Set-ItemProperty -Path $bgRegPath -Name 'GlobalUserDisabled' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\GameBar' -Name 'AllowAutoGameMode' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
 Set-ItemProperty -Path 'HKCU:\System\GameConfigStore' -Name 'GameDVR_Enabled' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
-Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'AppCaptureEnabled' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+$gameDvrPath = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR'
+if (-not (Test-Path $gameDvrPath)) { New-Item -Path $gameDvrPath -Force | Out-Null }
+Set-ItemProperty -Path $gameDvrPath -Name 'AppCaptureEnabled' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
 
 if ($Mode -in @("All", "Gaming")) {
-    New-Item -Path 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -Force | Out-Null
-    Set-ItemProperty -Path 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences' -Name 'DirectXUserGlobalSettings' -Value 'SwapEffectUpgradeEnable=1;' -Force -ErrorAction SilentlyContinue
+    $dxRegPath = 'HKCU:\Software\Microsoft\DirectX\UserGpuPreferences'
+    if (-not (Test-Path $dxRegPath)) { New-Item -Path $dxRegPath -Force | Out-Null }
+    Set-ItemProperty -Path $dxRegPath -Name 'DirectXUserGlobalSettings' -Value 'SwapEffectUpgradeEnable=1;' -Force -ErrorAction SilentlyContinue
     Write-Host "[OK] Enabled DirectX Windowed Flip-Model Optimization & Auto Game Mode" -ForegroundColor Green
 }
 Write-Host "[OK] Tuned UI responsiveness (MenuShowDelay=10ms), disabled background Store app wakeups & GameDVR" -ForegroundColor Green
@@ -121,8 +123,9 @@ Write-Host "================================================================" -F
 
 # 1. CPU Scheduler Priority (Win32PrioritySeparation = 0x26) & Disable Power Throttling
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl" -Name "Win32PrioritySeparation" -Value 38 -Type DWord -Force
-New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling" -Force | Out-Null
-Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling" -Name "PowerThrottlingOff" -Value 1 -Type DWord -Force
+$pwrThrottlePath = "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling"
+if (-not (Test-Path $pwrThrottlePath)) { New-Item -Path $pwrThrottlePath -Force | Out-Null }
+Set-ItemProperty -Path $pwrThrottlePath -Name "PowerThrottlingOff" -Value 1 -Type DWord -Force
 Write-Host "[OK] Configured CPU Foreground Scheduler (Win32PrioritySeparation=0x26) & disabled Power Throttling" -ForegroundColor Green
 
 # 2. RAM Consolidation (SvcHostSplitThresholdInKB matched to Physical RAM)
@@ -156,10 +159,12 @@ Write-Host "[OK] Optimized SSD & NTFS I/O (LongPaths=1, DisableLastAccess=1, Dis
 # 5. Windows Network Stack, Delivery Optimization P2P Disable & Ephemeral Ports
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "NetworkThrottlingIndex" -Value 0xffffffff -Type DWord -Force
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Value 0 -Type DWord -Force
-New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched" -Force | Out-Null
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched" -Name "NonBestEffortLimit" -Value 0 -Type DWord -Force
-New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Force | Out-Null
-Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Value 0 -Type DWord -Force
+$pschedPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched"
+if (-not (Test-Path $pschedPath)) { New-Item -Path $pschedPath -Force | Out-Null }
+Set-ItemProperty -Path $pschedPath -Name "NonBestEffortLimit" -Value 0 -Type DWord -Force
+$doConfigPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config"
+if (-not (Test-Path $doConfigPath)) { New-Item -Path $doConfigPath -Force | Out-Null }
+Set-ItemProperty -Path $doConfigPath -Name "DODownloadMode" -Value 0 -Type DWord -Force
 
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "MaxUserPort" -Value 65534 -Type DWord -Force
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "TcpTimedWaitDelay" -Value 30 -Type DWord -Force

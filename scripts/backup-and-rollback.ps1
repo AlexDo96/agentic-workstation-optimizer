@@ -34,15 +34,20 @@ if ($Action -eq "Backup") {
     Write-Host "   BACKUP: SAVING CURRENT SYSTEM SETTINGS" -ForegroundColor Cyan
     Write-Host "================================================================" -ForegroundColor Cyan
 
-    $primaryAdapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notmatch 'Virtual|VPN|WARP|Loopback|Bluetooth|Wireless Adapter for' } | Select-Object -First 1
+    $primaryAdapter = $null
+    try {
+        $primaryAdapter = Get-NetAdapter -ErrorAction Stop | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notmatch 'Virtual|VPN|WARP|Loopback|Bluetooth|Wireless Adapter for' } | Select-Object -First 1
+    } catch {}
     $nicProps = @{}
     if ($primaryAdapter) {
-        $adv = Get-NetAdapterAdvancedProperty -Name $primaryAdapter.Name -ErrorAction SilentlyContinue
-        foreach ($p in $adv) {
-            if ($p.RegistryKeyword) {
-                $nicProps[$p.RegistryKeyword] = $p.RegistryValue
+        try {
+            $adv = Get-NetAdapterAdvancedProperty -Name $primaryAdapter.Name -ErrorAction SilentlyContinue
+            foreach ($p in $adv) {
+                if ($p.RegistryKeyword) {
+                    $nicProps[$p.RegistryKeyword] = $p.RegistryValue
+                }
             }
-        }
+        } catch {}
     }
 
     $sysProfile  = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile' -ErrorAction SilentlyContinue
@@ -59,12 +64,16 @@ if ($Action -eq "Backup") {
     $desktopUi   = Get-ItemProperty 'HKCU:\Control Panel\Desktop' -ErrorAction SilentlyContinue
     $bgApps      = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications' -ErrorAction SilentlyContinue
 
-    $activeNicConfig = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" |
-        Where-Object { $_.Description -notmatch 'Virtual|VPN|WARP|Loopback' } | Select-Object -First 1
+    $activeNicConfig = $null
+    try {
+        $activeNicConfig = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" -ErrorAction Stop |
+            Where-Object { $_.Description -notmatch 'Virtual|VPN|WARP|Loopback' } | Select-Object -First 1
+    } catch {}
     $ifRegPath = if ($activeNicConfig) { "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\$($activeNicConfig.SettingID)" } else { "" }
     $ifProps = if ($ifRegPath -and (Test-Path $ifRegPath)) { Get-ItemProperty $ifRegPath -ErrorAction SilentlyContinue } else { $null }
 
-    $activePowerGuid = if ((powercfg /getactivescheme) -match '([a-f0-9-]{36})') { $matches[1] } else { "381b4222-f694-41f0-9685-ff5bb260df2e" }
+    $activePowerStr = (powercfg /getactivescheme) | Out-String
+    $activePowerGuid = if ($activePowerStr -match '([a-f0-9-]{36})') { $matches[1] } else { "381b4222-f694-41f0-9685-ff5bb260df2e" }
 
     $snapshot = [ordered]@{
         Timestamp               = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssK")

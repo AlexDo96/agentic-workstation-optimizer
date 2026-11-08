@@ -17,8 +17,13 @@ param(
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "   1. ACTIVE NETWORK ADAPTERS & HARDWARE PROPERTIES" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
-$adapters = Get-NetAdapter | Where-Object Status -eq 'Up'
-$adapters | Select-Object Name, InterfaceDescription, LinkSpeed, MacAddress | Format-Table -AutoSize
+$adapters = $null
+try {
+    $adapters = Get-NetAdapter -ErrorAction Stop | Where-Object Status -eq 'Up'
+    $adapters | Select-Object Name, InterfaceDescription, LinkSpeed, MacAddress | Format-Table -AutoSize
+} catch {
+    Write-Host "[INFO] WMI/CIM NetAdapter query restricted in current shell." -ForegroundColor Yellow
+}
 
 $primaryAdapter = $adapters | Where-Object { $_.InterfaceDescription -notmatch 'Virtual|VPN|WARP|Loopback|Bluetooth|Wireless Adapter for' } | Select-Object -First 1
 if (-not $primaryAdapter) { $primaryAdapter = $adapters | Select-Object -First 1 }
@@ -26,14 +31,16 @@ if (-not $primaryAdapter) { $primaryAdapter = $adapters | Select-Object -First 1
 $rxBuf = "N/A"; $txBuf = "N/A"; $eeeVal = "N/A"; $itrVal = "N/A"
 if ($primaryAdapter) {
     Write-Host "Primary Adapter Selected: $($primaryAdapter.Name) ($($primaryAdapter.InterfaceDescription))" -ForegroundColor Yellow
-    $advProps = Get-NetAdapterAdvancedProperty -Name $primaryAdapter.Name -ErrorAction SilentlyContinue
-    $rxBuf  = ($advProps | Where-Object RegistryKeyword -eq '*ReceiveBuffers').DisplayValue
-    $txBuf  = ($advProps | Where-Object RegistryKeyword -eq '*TransmitBuffers').DisplayValue
-    $eeeVal = ($advProps | Where-Object { $_.RegistryKeyword -in @('EEELinkAdvertisement','*EEE','AdvancedEEE') } | Select-Object -First 1).DisplayValue
-    $itrVal = ($advProps | Where-Object RegistryKeyword -eq 'ITR').DisplayValue
+    try {
+        $advProps = Get-NetAdapterAdvancedProperty -Name $primaryAdapter.Name -ErrorAction SilentlyContinue
+        $rxBuf  = ($advProps | Where-Object RegistryKeyword -eq '*ReceiveBuffers').DisplayValue
+        $txBuf  = ($advProps | Where-Object RegistryKeyword -eq '*TransmitBuffers').DisplayValue
+        $eeeVal = ($advProps | Where-Object { $_.RegistryKeyword -in @('EEELinkAdvertisement','*EEE','AdvancedEEE') } | Select-Object -First 1).DisplayValue
+        $itrVal = ($advProps | Where-Object RegistryKeyword -eq 'ITR').DisplayValue
 
-    $advProps | Where-Object { $_.RegistryKeyword -match 'Buffer|EEE|Green|Power|ULP|ITR|InterruptModeration|FlowControl' } |
-        Select-Object DisplayName, DisplayValue, RegistryKeyword | Format-Table -AutoSize
+        $advProps | Where-Object { $_.RegistryKeyword -match 'Buffer|EEE|Green|Power|ULP|ITR|InterruptModeration|FlowControl' } |
+            Select-Object DisplayName, DisplayValue, RegistryKeyword | Format-Table -AutoSize
+    } catch {}
 }
 
 Write-Host "================================================================" -ForegroundColor Cyan
@@ -53,7 +60,10 @@ Write-Host ("Win32 LongPathsEnabled : {0} (1=Enabled)" -f $fileSystem.LongPathsE
 Write-Host ("NTFS DisableLastAccess : {0} (0=Enabled [Slower I/O], 1=Disabled [Faster I/O])" -f $fileSystem.NtfsDisableLastAccessUpdate)
 Write-Host ("NTFS Disable8dot3Names : {0} (1=Disabled legacy short names [Faster I/O])" -f $fileSystem.NtfsDisable8dot3NameCreation)
 
-$activeNics = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" -ErrorAction SilentlyContinue
+$activeNics = $null
+try {
+    $activeNics = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" -ErrorAction Stop
+} catch {}
 $tcpNoDelayStatus = "N/A"
 foreach ($nic in $activeNics) {
     $regPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\$($nic.SettingID)"
@@ -83,28 +93,28 @@ Write-Host "NODE_OPTIONS (IPv4 Priority)  : $nodeOpts (Target: --dns-result-orde
 Write-Host "NODE_USE_SYSTEM_CA (Corp SSL) : $nodeCa (Target: 1)"
 
 $mtuCeiling = 1500
-foreach ($payload in @(1472, 1440, 1400, 1360)) {
-    $pingMtu = ping -n 1 -w 1000 -f -l $payload 8.8.8.8 2>$null
+foreach ($payload in @(1472, 1464, 1440, 1400, 1360)) {
+    $pingMtu = (ping -n 1 -w 1000 -f -l $payload 8.8.8.8 2>$null) | Out-String
     if ($pingMtu -match "Reply from") {
         $mtuCeiling = $payload + 28
         break
     }
 }
-Write-Host ("Effective Non-Fragmented MTU  : {0} bytes {1}" -f $mtuCeiling, $(if ($mtuCeiling -lt 1500) { "(Reduced MTU due to VPN/Tunnel overhead)" } else { "(Standard 1500 Ethernet MTU)" }))
+Write-Host ("Effective Non-Fragmented MTU  : {0} bytes {1}" -f $mtuCeiling, $(if ($mtuCeiling -lt 1492) { "(Reduced MTU due to VPN/Tunnel overhead)" } else { "(Standard Ethernet / PPPoE Fiber MTU)" }))
 
 Write-Host "`n================================================================" -ForegroundColor Cyan
 Write-Host "   4. CLOUD AI PROVIDER API LATENCY & DOWNLOAD SPEED" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
-$gw = ($activeNics | Where-Object { $_.DefaultIPGateway } | Select-Object -First 1).DefaultIPGateway[0]
+$gw = if ($activeNics) { ($activeNics | Where-Object { $_.DefaultIPGateway } | Select-Object -First 1).DefaultIPGateway[0] } else { $null }
 $gwPingMs = "N/A"
 if ($gw) {
-    $gwOut = ping -n 3 $gw
+    $gwOut = (ping -n 3 $gw) | Out-String
     if ($gwOut -match "Average = (\d+)ms") { $gwPingMs = "$($matches[1]) ms" }
     Write-Host "Default Gateway ($gw) Average Ping: $gwPingMs" -ForegroundColor Green
 }
 
 $googlePingMs = "N/A"
-$gOut = ping -n 3 8.8.8.8
+$gOut = (ping -n 3 8.8.8.8) | Out-String
 if ($gOut -match "Average = (\d+)ms") { $googlePingMs = "$($matches[1]) ms" }
 Write-Host "Google DNS (8.8.8.8) Average Ping     : $googlePingMs" -ForegroundColor Green
 
@@ -140,7 +150,8 @@ $powerScheme = powercfg /getactivescheme
 $prioControl = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' -ErrorAction SilentlyContinue).Win32PrioritySeparation
 $pwrThrottle = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling' -ErrorAction SilentlyContinue).PowerThrottlingOff
 $svcSplit    = (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control' -ErrorAction SilentlyContinue).SvcHostSplitThresholdInKB
-$osMem       = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
+$osMem       = $null
+try { $osMem = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop } catch {}
 $totalRamGB  = if ($osMem) { [math]::Round($osMem.TotalVisibleMemorySize / 1MB, 1) } else { "N/A" }
 $freeRamGB   = if ($osMem) { [math]::Round($osMem.FreePhysicalMemory / 1MB, 2) } else { "N/A" }
 
@@ -154,7 +165,7 @@ $bgAppsOff   = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersio
 $flashAttn   = [Environment]::GetEnvironmentVariable('OLLAMA_FLASH_ATTENTION', 'User')
 $kvCache     = [Environment]::GetEnvironmentVariable('OLLAMA_KV_CACHE_TYPE', 'User')
 $ollamaPar   = [Environment]::GetEnvironmentVariable('OLLAMA_NUM_PARALLEL', 'User')
-$wslMirrored = if ((Test-Path "$HOME\.wslconfig") -and ((Get-Content "$HOME\.wslconfig" -Raw) -match 'networkingMode\s*=\s*mirrored')) { "Enabled (Mirrored)" } else { "Default NAT / Not Configured" }
+$wslMirrored = if ((Test-Path "$HOME\.wslconfig" -ErrorAction SilentlyContinue) -and ((Get-Content "$HOME\.wslconfig" -Raw -ErrorAction SilentlyContinue) -match 'networkingMode\s*=\s*mirrored')) { "Enabled (Mirrored)" } else { "Default NAT / Not Configured" }
 
 Write-Host "Active Power Plan         : $powerScheme"
 Write-Host "CPU PrioritySeparation    : $prioControl (Default=2, Target=38 [0x26 Foreground Boost])"

@@ -197,15 +197,23 @@ Google Gemini (Antigravity)      -> DNS:0.029252s | TCP:0.088435s | TLS:0.181140
 OpenRouter (OpenCode / Multi)    -> DNS:0.002975s | TCP:0.039081s | TLS:0.081124s
 GitHub (Copilot / Git)           -> DNS:0.003105s | TCP:0.052140s | TLS:0.114502s
 
-Active Power Plan         : Power Scheme GUID: 3d4eaba8-aede-4736-a564-5c86b303ca8a (Ultimate Performance)
+Active Power Plan         : Power Scheme GUID: 3d4eaba8-aede-4736-a564-5c86b303ca8a  (Ultimate Performance)
+CPU PrioritySeparation    : 38 (Default=2, Target=38 [0x26 Foreground Boost])
+CPU PowerThrottlingOff    : 1 (1=Disabled background throttling)
+System Physical RAM       : 9.15 GB Free / 16 GB Total
+RAM SvcHostSplitThreshold : 16724896 KB (Consolidates svchost.exe when >= Total RAM KB)
 GPU HAGS (HwSchMode)      : 2 (1=Disabled, 2=Enabled)
 DirectX Windowed Flip     : SwapEffectUpgradeEnable=1;
+MMCSS Games Priority      : GPU Priority=8 (Target=8) | CPU Priority=6 (Target=6)
 Background GameDVR        : 0 (0=Disabled [Higher FPS], 1=Enabled)
 UI MenuShowDelay          : 10 ms (Default=400, Target=10)
+Store Background Apps Off : 1 (1=Disabled background wakeups)
 WSL2 Network Mode         : Enabled (Mirrored)
 OLLAMA_FLASH_ATTENTION    : 1 (Target=1)
 OLLAMA_KV_CACHE_TYPE      : q8_0 (Target=q8_0)
-NVIDIA GPU Status         : NVIDIA GeForce RTX 3060, 591.74, 49 C, 17.51 W, 1300 MiB, 12288 MiB
+OLLAMA_NUM_PARALLEL       : 2 (Target=2)
+Git Global Config         : longpaths=true | postBuffer=524288000 | sslBackend=schannel
+NVIDIA GPU Status         : NVIDIA GeForce RTX 3060, 621.14, 50.00, 16.06 W, 1087 MiB, 12288 MiB
 ```
 
 </details>
