@@ -1,0 +1,15 @@
+---
+description: Universal Network & AI Workstation Optimizer - Use when the user asks to check, fix, or maximize network speed, reduce latency/ping, optimize Cloud AI API streaming, tune router/Wi-Fi 6 settings, or accelerate Local AI (Ollama/CUDA/GPU) on Windows.
+globs:
+alwaysApply: false
+---
+
+# Network & AI Workstation Optimizer (`network-ai-optimizer`)
+
+When asked to diagnose or optimize network speed, latency, router/Wi-Fi performance, or AI workstation performance:
+
+1. Read and follow the step-by-step instructions in [SKILL.md](mdc:SKILL.md).
+2. Always run the read-only diagnostic script first:
+   `powershell -ExecutionPolicy Bypass -File ./scripts/diagnose-network-ai.ps1`
+3. Default to **Enterprise-Safe Mode** on company workstations (unlock Windows `NetworkThrottlingIndex`, NIC `Receive/Transmit Buffers = 2048`, disable `EEE`/`ULP` power saving, enable `TCPNoDelay = 1`, enable GPU `HAGS`, `LongPathsEnabled`, and `OLLAMA_FLASH_ATTENTION=1` + `q8_0` without altering corporate DNS/VPN/Firewall settings).
+4. Execute `powershell -ExecutionPolicy Bypass -File ./scripts/optimize-workstation.ps1` (or provide the elevated PowerShell Admin command block if non-elevated) and verify the before/after benchmark results.

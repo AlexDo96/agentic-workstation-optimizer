@@ -1,7 +1,8 @@
 <#
 .SYNOPSIS
     Unlocks Windows Network Stack, NIC Hardware Buffers/Power Saving, Power Plan,
-    GPU HAGS, Win32 LongPaths, and Ollama AI Acceleration on a Windows Workstation.
+    GPU HAGS, Win32 LongPaths, Cloud AI Agent Streaming (SSE), Agentic CLI Tooling (Git/Node/Python),
+    and Local AI Acceleration (Ollama Flash Attention + q8_0 KV Cache).
     Safe for Enterprise/Company PCs (does not alter corporate DNS, AD, or VPN profiles).
 #>
 
@@ -12,25 +13,40 @@ param(
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "   STEP 1: USER-SCOPE AI & POWER OPTIMIZATIONS" -ForegroundColor Cyan
+Write-Host "   STEP 1: USER-SCOPE AI, CLOUD AGENT & TOOLING OPTIMIZATIONS" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 
 # 1. Activate High Performance Power Plan
 powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
 Write-Host "[OK] Active Power Plan set to: $(powercfg /getactivescheme)" -ForegroundColor Green
 
-# 2. Configure Ollama AI Hardware Acceleration (Flash Attention + 8-bit KV Cache)
+# 2. Configure Local AI Hardware Acceleration (Ollama / Local LLM Runtimes)
 [Environment]::SetEnvironmentVariable('OLLAMA_FLASH_ATTENTION', '1', 'User')
 [Environment]::SetEnvironmentVariable('OLLAMA_KV_CACHE_TYPE', 'q8_0', 'User')
-Write-Host "[OK] Set OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0" -ForegroundColor Green
+if (-not [Environment]::GetEnvironmentVariable('OLLAMA_NUM_PARALLEL', 'User')) {
+    [Environment]::SetEnvironmentVariable('OLLAMA_NUM_PARALLEL', '2', 'User')
+}
+Write-Host "[OK] Set OLLAMA_FLASH_ATTENTION=1, OLLAMA_KV_CACHE_TYPE=q8_0, OLLAMA_NUM_PARALLEL=2" -ForegroundColor Green
 
-# 3. Disable Background GameDVR Screen Capture (Saves GPU VRAM & Encode Engine for AI)
+# 3. Configure Agentic CLI Tooling (Git LongPaths, HTTP/2 Buffer, Node/Python network resilience)
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    git config --global core.longpaths true
+    git config --global http.postBuffer 524288000
+    git config --global http.lowSpeedLimit 1000
+    git config --global http.lowSpeedTime 60
+    Write-Host "[OK] Configured Git for AI Agents (core.longpaths=true, http.postBuffer=500MB)" -ForegroundColor Green
+}
+[Environment]::SetEnvironmentVariable('UV_HTTP_TIMEOUT', '120', 'User')
+[Environment]::SetEnvironmentVariable('PIP_DEFAULT_TIMEOUT', '120', 'User')
+Write-Host "[OK] Configured Python uv/pip network timeouts (120s) for large AI wheel downloads" -ForegroundColor Green
+
+# 4. Disable Background GameDVR Screen Capture (Saves GPU VRAM & Encode Engine for AI)
 Set-ItemProperty -Path 'HKCU:\Software\Microsoft\GameBar' -Name 'AllowAutoGameMode' -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
 Set-ItemProperty -Path 'HKCU:\System\GameConfigStore' -Name 'GameDVR_Enabled' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
 Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'AppCaptureEnabled' -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
 Write-Host "[OK] Disabled background GameDVR capture overhead" -ForegroundColor Green
 
-# 4. Clean Duplicate Edge AutoLaunch Keys in HKCU Run
+# 5. Clean Duplicate Edge AutoLaunch Keys in HKCU Run
 $edgeKeys = Get-Item -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -ErrorAction SilentlyContinue |
     Select-Object -ExpandProperty Property | Where-Object { $_ -like 'MicrosoftEdgeAutoLaunch_*' }
 if ($edgeKeys) {
@@ -40,7 +56,7 @@ if ($edgeKeys) {
     Write-Host "[OK] Removed $($edgeKeys.Count) duplicate MicrosoftEdgeAutoLaunch startup keys" -ForegroundColor Green
 }
 
-# 5. Flush DNS & Clean Temp
+# 6. Flush DNS & Clean Temp
 ipconfig /flushdns | Out-Null
 Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host "[OK] Flushed DNS cache and cleaned %TEMP%" -ForegroundColor Green
@@ -70,7 +86,7 @@ Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" 
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -Type DWord -Force
 Write-Host "[OK] Enabled GPU HAGS (HwSchMode=2) and Win32 LongPathsEnabled=1" -ForegroundColor Green
 
-# 4. Enable TCPNoDelay & TcpAckFrequency=1 on Active Physical Interfaces
+# 4. Enable TCPNoDelay & TcpAckFrequency=1 on Active Physical Interfaces (Instant SSE Token Streaming)
 $nics = Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled = True" |
     Where-Object { $_.Description -notmatch 'Virtual|VPN|WARP|Loopback' }
 foreach ($n in $nics) {
@@ -82,7 +98,7 @@ foreach ($n in $nics) {
     }
 }
 
-# 5. Unlock NIC Hardware Properties (Auto-detects Intel, Realtek, etc.)
+# 5. Unlock NIC Hardware Properties (Auto-detects Intel, Realtek, Broadcom, MediaTek)
 if (-not $AdapterName) {
     $primaryAdapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceDescription -notmatch 'Virtual|VPN|WARP|Loopback|Bluetooth|Wireless Adapter for' } | Select-Object -First 1
     if ($primaryAdapter) { $AdapterName = $primaryAdapter.Name }

@@ -1,66 +1,59 @@
-# 🚀 Network & AI Workstation Optimizer (`network-ai-optimizer`)
+# 🚀 Universal Network & AI Workstation Optimizer (`network-ai-optimizer`)
 
-An Antigravity AI Agent Skill and PowerShell Automation Suite that diagnoses network bottlenecks, unlocks Windows OS & NIC hardware throughput limits (boosting typical throttled speeds from ~200 Mbps to **700–1000 Mbps**), reduces loaded ping (Bufferbloat), and tunes Windows workstations for high-speed Local AI / LLM inference (Ollama, CUDA, HAGS).
+A **Universal AI Agent Skill & PowerShell Automation Suite** compatible out-of-the-box with **Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf, and GitHub Copilot**.
 
-Includes an **Enterprise-Safe Mode** specifically designed for company workstations (optimizes local OS network stack, NIC buffers, power, and AI parameters without touching corporate DNS, Active Directory, VPNs, or company firewalls).
+It diagnoses network bottlenecks, unlocks Windows OS & NIC hardware throughput limits (boosting typical throttled speeds from ~200 Mbps to **700–1000 Mbps**), eliminates SSE token-streaming delay to Cloud AI APIs (`Anthropic`, `OpenAI`, `Gemini`, `OpenRouter`), optimizes Local AI / LLM inference (`Ollama`, `LM Studio`, `vLLM`, `CUDA`, `HAGS`), and tunes Wi-Fi 6 (`160MHz`) Mesh/ONT routers.
 
----
-
-## ✨ Key Capabilities
-
-1. **Comprehensive Network & AI Diagnostics (`scripts/diagnose-network-ai.ps1`)**
-   - Audits active LAN/Wi-Fi adapters, hardware link speeds, and NIC driver properties (`Receive/Transmit Buffers`, `EEE`, `ULP`, `Interrupt Moderation`).
-   - Detects Windows OS packet throttling (`NetworkThrottlingIndex`), QoS limits, and Nagle's algorithm (`TCPNoDelay`).
-   - Identifies background VPN/Tunneling processes (`Cloudflare WARP`, VPN clients) intercepting traffic.
-   - Measures gateway hop latency, international DNS ping, and single-stream CDN download throughput.
-   - Audits GPU status (`nvidia-smi`), Hardware-Accelerated GPU Scheduling (`HAGS`), Power Plan, and Ollama acceleration flags.
-
-2. **Workstation Network & AI Hardware Unlock (`scripts/optimize-workstation.ps1`)**
-   - **OS Network Stack:** Unlocks `NetworkThrottlingIndex = 0xffffffff`, `SystemResponsiveness = 0`, `NonBestEffortLimit = 0`, and enables `TCPNoDelay = 1` + `TcpAckFrequency = 1`.
-   - **NIC Hardware Tuning:** Auto-detects Intel/Realtek adapters, expands `ReceiveBuffers` & `TransmitBuffers` to `2048`, disables power-saving sleep states (`Energy Efficient Ethernet`, `Ultra Low Power Mode`, `Green Ethernet`), and optimizes interrupt moderation (`ITR`).
-   - **AI & GPU Tuning:** Switches to `High Performance` power scheme, enables GPU **HAGS (`HwSchMode = 2`)**, enables **`LongPathsEnabled = 1`** (for Python/Node/HuggingFace), and configures **`OLLAMA_FLASH_ATTENTION=1`** + **`OLLAMA_KV_CACHE_TYPE=q8_0`** (saves ~50% context VRAM).
-   - **System Cleanup:** Removes duplicate `MicrosoftEdgeAutoLaunch_*` startup bloat, disables background `GameDVR` screen-capture overhead, and flushes `%TEMP%` & DNS cache.
-
-3. **Router / Gateway & Wi-Fi 6 Mesh Optimization Guide (`references/router-optimization.md`)**
-   - Step-by-step runbook for identifying Wireless Mesh Backhaul vs. Wired ONT topology.
-   - Unlocking **5GHz `160MHz`** channel width on Wi-Fi 6 routers.
-   - Zero-downtime **Pure-5GHz SSID creation** (`SSID Index 2`) so mobile devices and laptops lock onto 5GHz without disconnecting existing 2.4GHz IoT devices.
-   - Disabling CPU-draining `NAT Session Limit` counters and configuring `UPnP` & `Static DHCP`.
+Includes a built-in **Enterprise-Safe Mode** specifically designed for company workstations (optimizes local OS network stack, NIC buffers, power, Git/Python tooling, and AI parameters without touching corporate DNS, Active Directory, VPNs, or company firewalls).
 
 ---
 
-## 📦 Installation (Antigravity Skill)
+## 🤖 Supported AI Coding Agents & Auto-Discovery Matrix
 
-Clone this repository directly into your Antigravity Global Skills directory or your project's `.agents/skills/` folder:
+This repository includes native discovery files for all major AI coding assistants PLUS a 1-click universal installer (`install.ps1`):
 
-### Option 1: Install Globally (Available in all workspaces on your PC)
+| AI Agent / IDE | Native Repo File | Global Install Path (via `install.ps1`) | How to Trigger |
+| :--- | :--- | :--- | :--- |
+| **Google Antigravity** | `SKILL.md` / `AGENTS.md` | `~/.gemini/config/skills/network-ai-optimizer/` | Ask to use `network-ai-optimizer` |
+| **Claude Code CLI** | `CLAUDE.md` / `.claude/commands/` | `~/.claude/skills/` & `~/.claude/commands/` | Type `/network-ai-optimizer` or ask in chat |
+| **OpenCode CLI** | `AGENTS.md` / `SKILL.md` | `~/.config/opencode/skills/` & `commands/` | Type `/network-ai-optimizer` or ask in chat |
+| **OpenAI Codex CLI** | `AGENTS.md` / `SKILL.md` | `~/.codex/skills/network-ai-optimizer/` | Ask Codex to run `network-ai-optimizer` |
+| **Cursor IDE** | `.cursor/rules/network-ai-optimizer.mdc` | `.cursor/rules/network-ai-optimizer.mdc` | `@network-ai-optimizer` or ask Agent |
+| **Windsurf / Copilot** | `AGENTS.md` | Workspace `AGENTS.md` | Ask in Cascade / Copilot Chat |
+
+---
+
+## 📦 1-Command Universal Installation
+
+Clone the repository and run **`install.ps1`** to automatically register the skill across **Antigravity, Claude Code, OpenCode, Codex, and Cursor** on your machine:
+
 ```powershell
-git clone https://github.com/AlexDo96/network-ai-optimizer.git "$HOME\.gemini\config\skills\network-ai-optimizer"
-```
-
-### Option 2: Install in a Project Workspace
-```powershell
-git clone https://github.com/AlexDo96/network-ai-optimizer.git ".agents/skills/network-ai-optimizer"
+git clone https://github.com/AlexDo96/network-ai-optimizer.git
+cd network-ai-optimizer
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 ---
 
-## 🛠️ Usage
+## ✨ What It Optimizes
 
-### With Antigravity Agent
-Simply ask the agent in chat:
-> *"Use the `network-ai-optimizer` skill to diagnose and unlock max network speed and AI performance on my workstation (Enterprise Safe mode)."*
+### 1. Network Hardware & Windows TCP/IP Stack Unlock
+- **OS Packet Throttling Unlock:** Sets `NetworkThrottlingIndex = 0xffffffff` (removes Windows' default 10-packet/ms multimedia cap), `SystemResponsiveness = 0`, and QoS `NonBestEffortLimit = 0`.
+- **NIC Hardware Buffers & Sleep Disable:** Auto-detects Intel/Realtek/Broadcom/MediaTek adapters, expands `ReceiveBuffers` & `TransmitBuffers` from `256/512` to **`2048`**, disables `Energy Efficient Ethernet (EEE)`, `Ultra Low Power Mode (ULP)`, `Green Ethernet`, and sets `Interrupt Moderation Rate (ITR) = Off`.
+- **Instant Cloud AI Token Streaming (`TCPNoDelay`):** Enables `TCPNoDelay = 1` & `TcpAckFrequency = 1` (disables Nagle's 200ms buffering) so Server-Sent Events (SSE) token streams from Anthropic Claude, OpenAI, Gemini, and OpenRouter render instantaneously.
 
-### Standalone PowerShell Execution
-You can also run the scripts directly from **PowerShell (Admin)**:
+### 2. Cloud AI API & Agentic CLI Tooling Resilience
+- **Cloud AI Endpoint Benchmarking:** Measures DNS lookup, TCP connect, and TLS handshake latency directly against `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `openrouter.ai`, and `api.github.com`.
+- **VPN / Proxy Bottleneck Detection:** Detects background interceptors (`Cloudflare WARP`, VPNs, proxy vars) that degrade throughput.
+- **Git & Python (`uv`/`pip`) Tuning:** Sets `git config --global core.longpaths true`, `http.postBuffer = 500MB`, `UV_HTTP_TIMEOUT = 120`, and Windows `LongPathsEnabled = 1` to prevent path-length and RPC errors in deep agentic workspaces.
 
-```powershell
-# 1. Run read-only diagnostics
-powershell -ExecutionPolicy Bypass -File .\scripts\diagnose-network-ai.ps1
+### 3. Local AI / LLM Workstation Acceleration
+- **GPU HAGS & Power Plan:** Activates Windows `High Performance` power scheme and enables **Hardware-Accelerated GPU Scheduling (`HwSchMode = 2`)**.
+- **Ollama Hardware Acceleration:** Configures `OLLAMA_FLASH_ATTENTION = 1`, `OLLAMA_KV_CACHE_TYPE = q8_0` (saves ~50% context VRAM with 8-bit KV quantization), and `OLLAMA_NUM_PARALLEL = 2`.
+- **System Cleanup:** Removes duplicate `MicrosoftEdgeAutoLaunch_*` startup keys, disables background `GameDVR` GPU capture overhead, and cleans `%TEMP%`.
 
-# 2. Apply full Workstation Network & AI optimizations
-powershell -ExecutionPolicy Bypass -File .\scripts\optimize-workstation.ps1
-```
+### 4. Router / Gateway & Wi-Fi 6 (`160MHz`) Mesh Runbook
+- Detailed guide (`references/router-optimization.md`) for identifying Wireless Mesh Backhaul vs. Wired ONT topology, unlocking **5GHz `160MHz`** channel width, creating a **Dedicated Pure-5GHz SSID** without disconnecting existing 2.4GHz IoT devices, and disabling CPU-draining `NAT Session Limit` counters.
 
 ---
 
