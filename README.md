@@ -1,6 +1,17 @@
+<div align="center">
+
 # 🚀 Universal Network & AI Workstation Optimizer (`network-ai-optimizer`)
 
-A **Universal AI Agent Skill & PowerShell Automation Suite** compatible out-of-the-box with **Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf, and GitHub Copilot**.
+**A Universal AI Agent Skill & PowerShell Automation Suite for Google Antigravity, Claude Code, OpenCode, Cursor, OpenAI Codex CLI, Windsurf, and GitHub Copilot.**
+
+[![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](./README.md)
+[![Tiếng Việt](https://img.shields.io/badge/Ngôn_ngữ-Tiếng_Việt-red?style=for-the-badge)](./README.vi.md)
+
+[🌐 **Read in English**](./README.md) | [🇻🇳 **Đọc bản Tiếng Việt**](./README.vi.md)
+
+</div>
+
+---
 
 It diagnoses network bottlenecks, unlocks Windows OS & NIC hardware throughput limits (boosting typical throttled speeds from ~200 Mbps to **700–1000 Mbps**), eliminates SSE token-streaming delay to Cloud AI APIs (`Anthropic`, `OpenAI`, `Gemini`, `OpenRouter`), optimizes Local AI / LLM inference (`Ollama`, `LM Studio`, `vLLM`, `CUDA`, `HAGS`), and tunes Wi-Fi 6 (`160MHz`) Mesh/ONT routers.
 
